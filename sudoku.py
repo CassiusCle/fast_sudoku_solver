@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Optional
+from typing import Union, Optional, List
 from sudoku_utils import print_sudoku_puzzle
 
 class Sudoku:
@@ -13,24 +13,22 @@ class Sudoku:
     """
 
     # Class-level constants for validating solutions
-    _ROW_INDICES = [np.arange(i*9, i*9+9) for i in range(8)]
-    _COL_INDICES = [np.arange(i, 81, 9) for i in range(9)]
+    _ROW_INDICES: list = [np.arange(i*9, i*9+9) for i in range(8)]
+    _COL_INDICES: list = [np.arange(i, 81, 9) for i in range(9)]
     _SUBSQ_INDICES = [np.concatenate([np.arange(start, stop) for start, stop in ranges]) 
                     for ranges in [[(i*9+k*3, i*9+3+k*3) for i in range(3)] for k in [0, 1, 9, 10]]]
-    IDX_LIST_ITEMS = _ROW_INDICES + _COL_INDICES + _SUBSQ_INDICES
-    ALL_DIGITS = np.arange(1, 10)
+    IDX_LIST_ITEMS: list = _ROW_INDICES + _COL_INDICES + _SUBSQ_INDICES
+    ALL_DIGITS: np.array = np.arange(1, 10)
 
     def __init__(self, puzzle: str, 
-                 candidate_solution: Optional[str] = None, 
                  solution: Optional[str] = None
                 ):
         """Initializes the Sudoku puzzle with the given puzzle and solution."""
-        self.puzzle = puzzle
-        self.candidate_solution = candidate_solution
-        self.solution = solution
-        self.solved = self.validate_solution() if candidate_solution else False
+        self.puzzle: str = puzzle
+        self.solution: str = solution
+        self.solved: bool = False
 
-    def print_sudoku(self, solve_status: str = 'Unsolved'):
+    def print_sudoku(self, solve_status: str = 'Unsolved', candidate_solution: str = None):
         """Prints the Sudoku puzzle based on its solve status.
 
         Args:
@@ -40,20 +38,20 @@ class Sudoku:
             print('Sudoku puzzle (Unsolved):')
             print_sudoku_puzzle(self.puzzle)
         elif solve_status == 'Candidate':
-            if self.solved and self.candidate_solution:
+            if candidate_solution and candidate_solution == self.solution:
                 print('Sudoku puzzle (Solved correctly):')
             else:
                 print('Sudoku puzzle (Candidate solution):')
-            print_sudoku_puzzle(self.puzzle, self.candidate_solution)
-            if not self.candidate_solution:
-                print('N.B.: No Candidate solution has been computed yet')
+            print_sudoku_puzzle(self.puzzle, candidate_solution)
+            if not candidate_solution:
+                print('N.B.: No Candidate solution provided')
         elif solve_status == 'Solution':
             print('Sudoku puzzle (Correct solution):')
             print_sudoku_puzzle(self.puzzle, self.solution)
             if not self.solution:
-                print('N.B.: The correct solution is not known for this puzzle')
+                print('N.B.: No solution available for this puzzle.')
     
-    def validate_solution(self) -> bool:
+    def validate_solution(self, candidate_solution: str) -> bool:
         """Validates if the solution is correct for a Sudoku puzzle.
 
         This method checks the minimum number of rows, columns and 3x3 subgrids to ensure that 
@@ -67,9 +65,12 @@ class Sudoku:
         Returns:
             bool: True if the solution is valid, False otherwise.
         """
-        if not self.candidate_solution:
-            raise ValueError('validate_solution method called without a candidate solution.')
-        solution_array = np.array(list(self.candidate_solution), dtype=int)
+        if len(candidate_solution) != 81:
+            raise ValueError('Candidate solution does not contain enough elements.')
+        elif type(candidate_solution) is not str:
+            raise TypeError(f'Candidate solution is not of type str: {type(candidate_solution)}.')
+        
+        solution_array = np.array(list(candidate_solution), dtype=int)
         for idx in Sudoku.IDX_LIST_ITEMS:
             if not np.array_equal(np.sort(np.unique(solution_array[idx])), Sudoku.ALL_DIGITS):
                 self.solved = False
@@ -78,6 +79,8 @@ class Sudoku:
         
         # TODO: Remove later, just checking if validation is actually same as correct solution 
         if self.solution:
-            self.validation_correct = self.candidate_solution == self.solution
+            self.validation_correct = candidate_solution == self.solution
+        else:
+            self.solution = candidate_solution
         return True
     
