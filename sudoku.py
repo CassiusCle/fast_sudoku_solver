@@ -78,6 +78,6 @@ class Sudoku:
         
         # TODO: Remove later, just checking if validation is actually same as correct solution 
         if self.solution:
-            self.verification_correct = self.candidate_solution == self.solution
+            self.validation_correct = self.candidate_solution == self.solution
         return True
     
