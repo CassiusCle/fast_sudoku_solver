@@ -1,18 +1,14 @@
 import numpy as np
 import itertools
-from typing import Union, Optional, List
+from typing import Optional, Tuple, Union
 from functools import reduce
 import logging
 
-class SudokuSolver:
-    """A class for solving 9x9 Sudoku puzzles.
+# Set up logging configuration  
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s') 
 
-    Attributes:
-        puzzle: A string representing the initial Sudoku puzzle.
-        solved: A boolean indicating whether the puzzle is solved.
-        candidate_solution: A string representing a candidate solution.
-        solution: A string representing the correct solution.
-    """
+class SudokuSolver:
+    """A class for solving 9x9 Sudoku puzzles."""
 
     # Class-level constants for validating solutions
     ROW_INDICES: list = [(f'r{i+1}', np.arange(i*9, i*9+9)) for i in range(9)]
@@ -48,7 +44,7 @@ class SudokuSolver:
             )
 
         # Helper function to divide a string into equal-sized chunks
-        def chunk_string(string: str, chunk_size: int) -> List[str]:
+        def chunk_string(string: str, chunk_size: int) -> list[str]:
             """Divides a string into chunks of equal size."""
             return [string[i:i + chunk_size] for i in range(0, len(string), chunk_size)]
 
@@ -84,7 +80,7 @@ class SudokuSolver:
         # Print the final formatted sudoku grid
         print('\n'.join(replace_chars(line) for line in output))
     
-    def validate_solution(self, candidate_solution: str | list) -> tuple[Union[str, None], bool]:
+    def validate_solution(self, candidate_solution: str | list) -> Tuple[Union[str, None], bool]:
         """Validates if the solution is correct for a Sudoku puzzle.
 
         This method checks the minimum number of rows, columns and 3x3 subgrids to ensure that 
@@ -111,7 +107,7 @@ class SudokuSolver:
                 return (grouping, False)
         return (None, True)
     
-    def _prune_filled_values(self, candidates_per_field: List[List[int]], idx: List[int]) -> List[List[int]]:
+    def _prune_filled_values(self, candidates_per_field: list[list[int]], idx: list[int]) -> list[list[int]]:
         """Prune filled values from Sudoku fields within a specified grouping.
 
         This function removes candidates from the fields that aren't complete yet in cases where 
@@ -139,7 +135,7 @@ class SudokuSolver:
         
         return candidates_per_field
 
-    def _count_combinations(self, candidates_per_field: List[List[int]]) -> int:
+    def _count_combinations(self, candidates_per_field: list[list[int]]) -> int:
         """Calculate the total number of combinations.
 
         Args:
