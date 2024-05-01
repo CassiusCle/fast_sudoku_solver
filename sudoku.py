@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import itertools
 from typing import Optional, Tuple, Union
@@ -80,7 +81,51 @@ class SudokuSolver:
         # Print the final formatted sudoku grid
         print('\n'.join(replace_chars(line) for line in output))
     
-    def validate_solution(self, candidate_solution: str | list) -> Tuple[Union[str, None], bool]:
+    def validate_solution(self, candidate_solution: np.ndarray) -> bool:
+        """Check if a Sudoku solution is valid.
+
+        Validates a 9x9x9 3D array representing a Sudoku puzzle solution, where each layer in the third dimension 
+        corresponds to the positions of (n+1)s in the solution.
+
+        Args:
+            candidate_solution (np.ndarray): A 3D array representing a proposed Sudoku solution.
+
+        Raises:
+            TypeError: If candidate_solution is not a numpy.ndarray.
+            ValueError: If candidate_solution does not have the correct shape or number of elements.
+            ValueError: If candidate_solution does not exactly one digit for each field in the original Sudoku
+
+        Returns:
+            bool: True if the solution is valid, False otherwise.
+        """
+        if not isinstance(candidate_solution, np.ndarray):
+            raise TypeError(f'Expected numpy.ndarray, got {type(candidate_solution).__name__}.')
+
+        if candidate_solution.shape != (9, 9, 9):
+            raise ValueError('Candidate solution must be a 9x9x9 3D array.')
+        
+        if candidate_solution.sum(axis=2).prod() != 1:
+            raise ValueError('Candidate solution does not contain exactly one digit on each field.')
+        
+        # Check if all rows contain each digit only once (sum is over cols)
+        is_rows_correct = candidate_solution.sum(axis=1).prod() == 1 # (sum is over cols)
+
+        # Check if all cols contain each digit only once (sum is over rows)
+        is_columns_correct = candidate_solution.sum(axis=0).prod() == 1 
+
+        # Check if all subsquares contain each digit only once
+        subsquare_ranges = [(0, 3), (3, 6)]
+        is_min_subsquares_correct = math.prod([ # prod over minimal subsquares
+            candidate_solution[r[0]:r[1], c[0]:c[1]].sum(axis=(0,1)).prod()
+            for r in subsquare_ranges 
+            for c in subsquare_ranges
+            ]) == 1
+        
+        is_solution_correct = is_rows_correct and is_columns_correct and is_min_subsquares_correct
+
+        return is_solution_correct
+    
+    def validate_solution_string(self, candidate_solution: str | list) -> Tuple[Union[str, None], bool]:
         """Validates if the solution is correct for a Sudoku puzzle.
 
         This method checks the minimum number of rows, columns and 3x3 subgrids to ensure that 
@@ -146,7 +191,7 @@ class SudokuSolver:
         """
         return reduce(lambda x, y: x * len(y), candidates_per_field, 1)
 
-    def solve(self, unsolved_sudoku: str, verbose: bool = False) -> str:
+    def solve_string(self, unsolved_sudoku: str, verbose: bool = False) -> str:
         """Solve the Sudoku puzzle.
 
         This method solves the Sudoku puzzle by first pruning the candidates based on filled values until no further reduction is possible.
@@ -160,6 +205,75 @@ class SudokuSolver:
         Returns:
             str: The solved Sudoku puzzle in string format.
         """    
+        candidates_per_field = [list(range(1,10)) if i == '0' else [int(i)] for i in list(unsolved_sudoku)]
+
+        # Prune the candidates based on filled values until no further reduction is possible
+        current_combinations = self._count_combinations(candidates_per_field)
+        while True:
+            previous_combinations = current_combinations
+            for _, idx in SudokuSolver.ROW_INDICES+SudokuSolver.COL_INDICES+SudokuSolver.SUBSQ_INDICES:
+                candidates_per_field = self._prune_filled_values(idx=idx, candidates_per_field=candidates_per_field)
+            
+            current_combinations = self._count_combinations(candidates_per_field)
+            
+            if current_combinations >= previous_combinations or current_combinations == 1:
+                break
+        
+        # Return solution in case only one combination is left (=solved)
+        if current_combinations == 1:
+            return ''.join([str(c[0]) for c in candidates_per_field])
+
+        if current_combinations >= 10_000_000:
+            logging.warning('More than 10,000,000 combinations to check, aborting...')
+            return None
+        
+        # Brute force solutions        
+        combinations = itertools.product(*candidates_per_field)
+        i = 0
+        for combination in combinations:
+            i += 1
+            if self.validate_solution(candidate_solution=list(combination))[1]:
+                break
+        if verbose: print(f'Solution found at iteration: {i} of {current_combinations}')
+        return ''.join([str(i) for i in combination])
+    
+    def solve(self, unsolved_sudoku: str, verbose: bool = False) -> str:
+        # """Solve the Sudoku puzzle.
+
+        # This method solves the Sudoku puzzle by first pruning the candidates based on filled values until no further reduction is possible.
+        # If only one combination is left, it returns the solution. Otherwise, it brute forces solutions.
+
+        # Args:
+        #     unsolved_sudoku (str): The unsolved Sudoku puzzle in string format.
+        #     verbose (bool, optional): If True, print the iteration at which the solution was found. Defaults to False.
+        #     fill_from_top (bool, optional): If True, fill the Sudoku from top. Defaults to True.
+
+        # Returns:
+        #     str: The solved Sudoku puzzle in string format.
+        # """    
+        
+        # Set up puzzles in numpy and fill 3D array with possibilities
+        puzzle_2d = np.reshape(np.array(list(unsolved_sudoku), dtype=np.int32), newshape=(9, 9))
+        puzzle_3d = np.zeros((9,9,9), dtype=np.byte) # [row][column][depth]
+        options_3d = puzzle_3d.copy()
+        
+        for i, value in np.ndenumerate(puzzle_2d):
+            if value != 0:
+                puzzle_3d[i[0], i[1], value-1] = 1
+                options_3d[i[0], i[1], value-1] = 1
+            else:
+                options_3d[i[0], i[1]] = 1
+        
+        num_possibilities = options_3d.sum(axis=2).prod()
+
+        # Return answer if only one possibility left
+        if num_possibilities == 1:
+            return ''.join(map(str, (options_3d.argmax(axis=2)+1).flatten()))
+
+
+            
+        ####### After this is old
+        
         candidates_per_field = [list(range(1,10)) if i == '0' else [int(i)] for i in list(unsolved_sudoku)]
 
         # Prune the candidates based on filled values until no further reduction is possible
