@@ -1,23 +1,22 @@
-import numpy as np
 import itertools
-from typing import Optional, Iterable, Generator, Tuple, Union, List, Iterator
 import logging
+from typing import Generator, Iterable, Iterator, List, Optional, Tuple, Union
+
+import numpy as np
 
 # Set up logging configuration  
 logging.basicConfig(level=logging.WARNING, format='%(levelname)s: %(message)s') 
 
 class SudokuSolver:
-    """A class for solving 9x9 Sudoku puzzles.
-    use NJIT numba decorator as optional for large lists
-    """
+    """A class for solving 9x9 Sudoku puzzles."""
     
     # Class-level constants
-    PUZZLE_SIZE = 9
-    PUZZLE_DEPTH = 9
-    SHAPE_2D = (PUZZLE_SIZE, PUZZLE_SIZE)
-    SHAPE_3D = (PUZZLE_SIZE, PUZZLE_SIZE, PUZZLE_DEPTH)
+    PUZZLE_SIZE: int = 9
+    PUZZLE_DEPTH: int = 9
+    SHAPE_2D: Tuple[int, int] = (PUZZLE_SIZE, PUZZLE_SIZE)
+    SHAPE_3D: Tuple[int, int, int] = (PUZZLE_SIZE, PUZZLE_SIZE, PUZZLE_DEPTH)
     
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes the SudokuSolver class."""
         pass
 
