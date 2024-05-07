@@ -7,7 +7,7 @@ import numpy as np
 # Set up logging configuration  
 logging.basicConfig(level=logging.WARNING, format='%(levelname)s: %(message)s') 
 
-class SudokuSolver:
+class Sudoku:
     """A class for solving 9x9 Sudoku puzzles."""
     
     # Class-level constants
@@ -20,7 +20,8 @@ class SudokuSolver:
         """Initializes the SudokuSolver class."""
         pass
 
-    def print_puzzle(self, puzzle: Union[str, int], solution: Optional[str] = None) -> None:
+    @staticmethod
+    def print_puzzle(puzzle: Union[str, int], solution: Optional[str] = None) -> None:
         """Prints a sudoku puzzle and its solution in a formatted way.
 
         Args:
@@ -77,8 +78,8 @@ class SudokuSolver:
         # Print the final formatted sudoku grid
         print('\n'.join(replace_chars(line) for line in output))
     
-
-    def _validate_solution(self, candidate_solution: np.ndarray) -> bool:
+    @staticmethod
+    def _validate_solution(candidate_solution: np.ndarray) -> bool:
         """Check if a Sudoku solution is valid.
 
         Validates a 9x9x9 3D array representing a Sudoku puzzle solution. Each layer in the third dimension 
@@ -122,7 +123,8 @@ class SudokuSolver:
     
         return True
     
-    def validate_solution(self, candidate_solution: Union[str, List[str]]) -> bool:
+    @staticmethod
+    def validate_solution(candidate_solution: Union[str, List[str]]) -> bool:
         """Converts a candidate solution from string or list format and validates it.
 
         This method first converts a candidate solution provided as a string or list into a 3D NumPy array, 
@@ -141,10 +143,11 @@ class SudokuSolver:
         if not isinstance(candidate_solution, (str, list)):
             raise TypeError('Candidate solution must be a string or a list.')
         
-        _, candidate_3d = self._string_to_np_puzzle(candidate_solution)
-        return self._validate_solution(candidate_solution=candidate_3d)
+        _, candidate_3d = Sudoku._string_to_np_puzzle(candidate_solution)
+        return Sudoku._validate_solution(candidate_solution=candidate_3d)
     
-    def _string_to_np_puzzle(self, sudoku: str) -> Tuple[np.ndarray, np.ndarray]:
+    @staticmethod
+    def _string_to_np_puzzle(sudoku: str) -> Tuple[np.ndarray, np.ndarray]:
         """Convert a string representing a sudoku puzzle into 2D and 3D numpy array representations.
 
         The 2D array represents the puzzle itself, and the 3D array represents the possibilities for each cell.
@@ -157,8 +160,8 @@ class SudokuSolver:
         """
         # Convert the string to a 2D numpy array
         puzzle_2d: np.ndarray = np.reshape(np.fromiter(sudoku, dtype='l'), 
-                                           newshape=SudokuSolver.SHAPE_2D)
-        options_3d: np.ndarray = np.zeros(SudokuSolver.SHAPE_3D, dtype='l') # [row][column][depth]
+                                           newshape=Sudoku.SHAPE_2D)
+        options_3d: np.ndarray = np.zeros(Sudoku.SHAPE_3D, dtype='l') # [row][column][depth]
         
         # Update options_3d based on the non-zero values in puzzle_2d
         nonzero_indices = np.nonzero(puzzle_2d)        
@@ -171,7 +174,8 @@ class SudokuSolver:
         
         return puzzle_2d, options_3d
 
-    def _np_puzzle_to_string(self, np_puzzle: np.ndarray) -> str:
+    @staticmethod
+    def _np_puzzle_to_string(np_puzzle: np.ndarray) -> str:
         """Converts a 3D NumPy array representing a Sudoku puzzle into a string.
 
         This method takes a 3D NumPy array where each 2D slice along the third axis represents
@@ -193,14 +197,15 @@ class SudokuSolver:
         """
         if not isinstance(np_puzzle, np.ndarray) or len(np_puzzle.shape) != 3:
             raise ValueError('The input must be a 3D NumPy array representing a Sudoku puzzle.')
-        if np_puzzle.shape != SudokuSolver.SHAPE_3D:
-            raise ValueError(f'Expected puzzle shape {SudokuSolver.SHAPE_3D}, but got {np_puzzle.shape}.')
+        if np_puzzle.shape != Sudoku.SHAPE_3D:
+            raise ValueError(f'Expected puzzle shape {Sudoku.SHAPE_3D}, but got {np_puzzle.shape}.')
 
         # Convert the 3D possibilities array into a 1D string representation
         puzzle_string: str = ''.join(map(str, (np_puzzle.argmax(axis=2) + 1).flatten()))
         return puzzle_string
-         
-    def _generate_cell_index_updates(self, *iterables: Iterable[int]) -> Generator[Tuple[Tuple[None, int], ...], None, None]:
+    
+    @staticmethod
+    def _generate_cell_index_updates(*iterables: Iterable[int]) -> Generator[Tuple[Tuple[None, int], ...], None, None]:
         """Yields unique combinations of cell indices for updating a Sudoku puzzle's possibilities.
 
         This generator function yields the indices of the cells in the Sudoku possibilities cube
@@ -225,11 +230,11 @@ class SudokuSolver:
             # Yield indices that are different from the previous combination
             yield tuple((p, c) for c, p in zip(comb, prev_comb) if c != p)
             prev_comb = comb
-      
-    def _apply_elimination(self, 
-                                puzzle_2d: np.ndarray, 
-                                options_3d: np.ndarray
-                                ) -> Tuple[bool, bool, np.ndarray, np.ndarray]:
+    
+    @staticmethod
+    def _apply_elimination(puzzle_2d: np.ndarray, 
+                           options_3d: np.ndarray
+                           ) -> Tuple[bool, bool, np.ndarray, np.ndarray]:
         """
         Apply basic elimination rules to the Sudoku puzzle until no further progress is made.
 
@@ -295,7 +300,8 @@ class SudokuSolver:
         
         return has_progress, is_solved, puzzle_2d, options_3d
     
-    def solve(self, unsolved_sudoku: str, max_iterations: int = 10_000_000) -> Optional[str]:
+    @staticmethod
+    def solve(unsolved_sudoku: str, max_iterations: int = 10_000_000) -> Optional[str]:
         """Solves a Sudoku puzzle.
 
         Solves the Sudoku puzzle by pruning candidates based on filled values until no further
@@ -314,18 +320,18 @@ class SudokuSolver:
         Raises:
             ValueError: If the provided Sudoku string is not valid.
         """
-        puzzle_2d, options_3d = self._string_to_np_puzzle(unsolved_sudoku)
+        puzzle_2d, options_3d = Sudoku._string_to_np_puzzle(unsolved_sudoku)
 
-        has_progress, is_solved, puzzle_2d, options_3d = self._apply_elimination(puzzle_2d, options_3d)
+        has_progress, is_solved, puzzle_2d, options_3d = Sudoku._apply_elimination(puzzle_2d, options_3d)
         
         if is_solved:
-            self._np_puzzle_to_string(options_3d)
+            Sudoku._np_puzzle_to_string(options_3d)
 
         num_possibilities: int = options_3d.sum(axis=2).prod()
 
         # Return answer if only one possibility left
         if num_possibilities == 1:
-            return self._np_puzzle_to_string(options_3d)
+            return Sudoku._np_puzzle_to_string(options_3d)
 
         if num_possibilities >= max_iterations or num_possibilities < 0:
             logging.info(f'More than {max_iterations:_} combinations to check, aborting...')
@@ -336,7 +342,7 @@ class SudokuSolver:
         options_idx
 
         # Create the generator
-        generator = self._generate_cell_index_updates(*options_idx)
+        generator = Sudoku._generate_cell_index_updates(*options_idx)
 
         # Set-up first option
         for idx in next(generator): 
@@ -344,8 +350,8 @@ class SudokuSolver:
             options_3d[*idx[1]] = 1
         
         # Return first option if valid
-        if self._validate_solution(options_3d):
-            return self._np_puzzle_to_string(options_3d)
+        if Sudoku._validate_solution(options_3d):
+            return Sudoku._np_puzzle_to_string(options_3d)
 
         # Iterate over other options
         for changes in generator:
@@ -353,8 +359,8 @@ class SudokuSolver:
                 options_3d[*idx[0]] = 0
                 options_3d[*idx[1]] = 1
             
-            if self._validate_solution(options_3d):
-                return self._np_puzzle_to_string(options_3d)
+            if Sudoku._validate_solution(options_3d):
+                return Sudoku._np_puzzle_to_string(options_3d)
         
         return None
 
@@ -363,7 +369,7 @@ def main():
     file_name = 'sudokus_100k_sub_1mio.csv'
     df = pd.read_csv(os.path.join(directory, file_name))
 
-    sudoku_solver = SudokuSolver()
+    sudoku_solver = Sudoku()
 
     test_new = False
 
