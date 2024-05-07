@@ -226,21 +226,44 @@ class SudokuSolver:
             yield tuple((p, c) for c, p in zip(comb, prev_comb) if c != p)
             prev_comb = comb
       
-    def _apply_rule_elimination(self, puzzle_2d: np.ndarray, options_3d: np.ndarray) -> Tuple[bool]:
-        """applies the basic elimination rules to the sudoku puzzle until no progress is made anymore"""
+    def _apply_elimination(self, 
+                                puzzle_2d: np.ndarray, 
+                                options_3d: np.ndarray
+                                ) -> Tuple[bool, bool, np.ndarray, np.ndarray]:
+        """
+        Apply basic elimination rules to the Sudoku puzzle until no further progress is made.
+
+        This method iteratively applies Sudoku elimination rules to the given puzzle.
+        It updates the puzzle state and the options cube until the puzzle is solved
+        or no more progress can be made.
+
+        Args:
+            puzzle_2d: A 2D NumPy array representing the current state of the Sudoku puzzle.
+            options_3d: A 3D NumPy array representing the possible values for each cell.
+
+        Returns:
+            A tuple containing:
+            - has_progress: A boolean indicating if progress was made in the last iteration.
+            - is_solved: A boolean indicating if the puzzle is solved.
+            - puzzle_2d: The updated 2D puzzle state.
+            - options_3d: The updated 3D options cube.
+        """
         
         iterations = 0
         has_progress = False 
         is_solved = False
 
         while True:
+            # Store the previous state of the puzzle to detect changes
             prev_puzzle_2d = puzzle_2d
+            # Find the indices of cells with known values
             known_cells = np.argwhere(puzzle_2d)
             
+            # Extract row and column indices, and adjust values for 0-indexing
             rows, cols = known_cells[:, 0], known_cells[:, 1]
             values = puzzle_2d[rows, cols] - 1
 
-            # Set column, row, and box to zero for all known cells
+            # Eliminate options based on known cell values
             options_3d[rows, :, values] = 0
             options_3d[:, cols, values] = 0
             box_start_rows, box_start_cols = 3 * (rows // 3), 3 * (cols // 3)
@@ -250,18 +273,22 @@ class SudokuSolver:
             # Set known cells back to one
             options_3d[rows, cols, values] = 1
 
+            # Update the puzzle state based on the options cube
             puzzle_2d = options_3d.argmax(axis=2) + 1
+            # Reset cells with multiple options to zero
             puzzle_2d[options_3d.sum(axis=2) != 1] = 0
 
             iterations += 1
 
+            # Check for changes in the puzzle state to determine progress
             if np.array_equal(puzzle_2d, prev_puzzle_2d):
                 if iterations > 1: 
                     has_progress = True
                 else:
                     has_progress = False
                 break
-
+            
+            # Check if the puzzle is solved
             if puzzle_2d.sum() == 405:
                 is_solved = True
                 break
@@ -289,7 +316,7 @@ class SudokuSolver:
         """
         puzzle_2d, options_3d = self._string_to_np_puzzle(unsolved_sudoku)
 
-        has_progress, is_solved, puzzle_2d, options_3d = self._apply_rule_elimination(puzzle_2d, options_3d)
+        has_progress, is_solved, puzzle_2d, options_3d = self._apply_elimination(puzzle_2d, options_3d)
         
         if is_solved:
             self._np_puzzle_to_string(options_3d)
