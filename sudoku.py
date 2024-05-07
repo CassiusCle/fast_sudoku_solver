@@ -156,9 +156,9 @@ class SudokuSolver:
             Tuple[np.ndarray, np.ndarray]: A tuple containing the 2D puzzle array and the 3D possibilities array.
         """
         # Convert the string to a 2D numpy array
-        puzzle_2d: np.ndarray = np.reshape(np.array(list(sudoku), dtype=np.uint8), 
+        puzzle_2d: np.ndarray = np.reshape(np.fromiter(sudoku, dtype='l'), 
                                            newshape=SudokuSolver.SHAPE_2D)
-        options_3d: np.ndarray = np.zeros(SudokuSolver.SHAPE_3D, dtype=np.uint8) # [row][column][depth]
+        options_3d: np.ndarray = np.zeros(SudokuSolver.SHAPE_3D, dtype='l') # [row][column][depth]
         
         # Update options_3d based on the non-zero values in puzzle_2d
         nonzero_indices = np.nonzero(puzzle_2d)        
@@ -317,6 +317,8 @@ def main():
 
     sudoku_solver = SudokuSolver()
 
+    test_new = False
+
     def process_row(row):
         max_it = 5_000_000
         start_time = time.perf_counter()
@@ -324,25 +326,36 @@ def main():
         solve_time = time.perf_counter() - start_time if solution else None
         valid = solution == row['solutions']
 
-        # start_time = time.perf_counter()
-        # solution_alt = sudoku_solver.solve_2progress(unsolved_sudoku=row['quizzes'], max_iterations=max_it)
-        # solve_time_alt = time.perf_counter() - start_time if solution else None
-        # valid_alt = solution == row['solutions']
-
-        return pd.Series([solution, solve_time, valid])#, solution_str, solve_time_str, valid_str])
-        # return pd.Series([solution, solve_time, valid, solution_alt, solve_time_alt, valid_alt])
+        if test_new:
+            start_time = time.perf_counter()
+            solution_new = sudoku_solver.solve_new(unsolved_sudoku=row['quizzes'], max_iterations=max_it)
+            solve_time_new = time.perf_counter() - start_time if solution else None
+            valid_new = solution == row['solutions']
+            return pd.Series([solution, solve_time, valid, solution_new, solve_time_new, valid_new])
+        else:
+            return pd.Series([solution, solve_time, valid])
 
     # Apply the function to each row with a progress bar
     tqdm.pandas()
-    # df[['solution', 'solve_time', 'valid', 'solution_alt', 'solve_time_alt', 'valid_alt']] = df.progress_apply(process_row, axis=1)
-    df[['solution', 'solve_time', 'valid']] = df.progress_apply(process_row, axis=1)
 
-    print(f"Valid solutions:\t{all(df[df['solution'].notna()]['valid'])}")
-    # print(f"Valid alt. solutions:\t{all(df[df['solution_alt'].notna()]['valid_alt'])}")
+    start_full_data = time.perf_counter()
+
+    if test_new:
+        df[['solution', 'solve_time', 'valid', 'solution_new', 'solve_time_new', 'valid_new']] = df.progress_apply(process_row, axis=1)
+        print(f"Valid alt. solutions:\t{all(df[df['solution_alt'].notna()]['valid_alt'])}")
+    else:
+        df[['solution', 'solve_time', 'valid']] = df.progress_apply(process_row, axis=1)
+        print(f"Valid solutions:\t{all(df[df['solution'].notna()]['valid'])}")
+
+    solve_time_full_data =  time.perf_counter() - start_full_data 
 
     print(f'\nTiming results:')
-    print(df[['solve_time']].describe())
-    # print(df[['solve_time', 'solve_time_alt']].describe())
+    print(f'\nTotal time: {solve_time_full_data:.4}')
+
+    if test_new:
+        print(df[['solve_time', 'solve_time_alt']].describe())
+    else:
+        print(df[['solve_time']].describe())
 
 if __name__ == "__main__":
     import os
