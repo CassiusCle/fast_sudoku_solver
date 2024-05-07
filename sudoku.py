@@ -226,26 +226,12 @@ class SudokuSolver:
             yield tuple((p, c) for c, p in zip(comb, prev_comb) if c != p)
             prev_comb = comb
       
-    def solve(self, unsolved_sudoku: str, max_iterations: int = 10_000_000) -> Optional[str]:
-        """Solves a Sudoku puzzle.
-
-        Solves the Sudoku puzzle by pruning candidates based on filled values until no further
-        reduction is possible. If only one combination is left, it returns the solution.
-        Otherwise, it attempts to brute force solutions.
-
-        Args:
-            unsolved_sudoku (str): The unsolved Sudoku puzzle in string format.
-            max_iterations (int, optional): The maximum number of iterations to attempt before
-                                             aborting. Defaults to 10,000,000.
-
-        Returns:
-            str: The solved Sudoku puzzle in string format, or None if a solution cannot be found
-                 within the maximum number of iterations.
-
-        Raises:
-            ValueError: If the provided Sudoku string is not valid.
-        """
-        puzzle_2d, options_3d = self._string_to_np_puzzle(unsolved_sudoku)
+    def _apply_rule_elimination(self, puzzle_2d: np.ndarray, options_3d: np.ndarray) -> Tuple[bool]:
+        """applies the basic elimination rules to the sudoku puzzle until no progress is made anymore"""
+        
+        iterations = 0
+        has_progress = False 
+        is_solved = False
 
         while True:
             prev_puzzle_2d = puzzle_2d
@@ -267,12 +253,47 @@ class SudokuSolver:
             puzzle_2d = options_3d.argmax(axis=2) + 1
             puzzle_2d[options_3d.sum(axis=2) != 1] = 0
 
+            iterations += 1
+
             if np.array_equal(puzzle_2d, prev_puzzle_2d):
+                if iterations > 1: 
+                    has_progress = True
+                else:
+                    has_progress = False
                 break
 
             if puzzle_2d.sum() == 405:
-                return self._np_puzzle_to_string(options_3d)
+                is_solved = True
+                break
         
+        return has_progress, is_solved, puzzle_2d, options_3d
+    
+    def solve(self, unsolved_sudoku: str, max_iterations: int = 10_000_000) -> Optional[str]:
+        """Solves a Sudoku puzzle.
+
+        Solves the Sudoku puzzle by pruning candidates based on filled values until no further
+        reduction is possible. If only one combination is left, it returns the solution.
+        Otherwise, it attempts to brute force solutions.
+
+        Args:
+            unsolved_sudoku (str): The unsolved Sudoku puzzle in string format.
+            max_iterations (int, optional): The maximum number of iterations to attempt before
+                                             aborting. Defaults to 10,000,000.
+
+        Returns:
+            str: The solved Sudoku puzzle in string format, or None if a solution cannot be found
+                 within the maximum number of iterations.
+
+        Raises:
+            ValueError: If the provided Sudoku string is not valid.
+        """
+        puzzle_2d, options_3d = self._string_to_np_puzzle(unsolved_sudoku)
+
+        has_progress, is_solved, puzzle_2d, options_3d = self._apply_rule_elimination(puzzle_2d, options_3d)
+        
+        if is_solved:
+            self._np_puzzle_to_string(options_3d)
+
         num_possibilities: int = options_3d.sum(axis=2).prod()
 
         # Return answer if only one possibility left
