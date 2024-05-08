@@ -1,27 +1,27 @@
-import numpy as np
 import itertools
-from typing import Optional, Iterable, Generator, Tuple, Union, List, Iterator
 import logging
+from typing import Generator, Iterable, Iterator, List, Optional, Tuple, Union
+
+import numpy as np
 
 # Set up logging configuration  
 logging.basicConfig(level=logging.WARNING, format='%(levelname)s: %(message)s') 
 
-class SudokuSolver:
-    """A class for solving 9x9 Sudoku puzzles.
-    use NJIT numba decorator as optional for large lists
-    """
+class Sudoku:
+    """A class for solving 9x9 Sudoku puzzles."""
     
     # Class-level constants
-    PUZZLE_SIZE = 9
-    PUZZLE_DEPTH = 9
-    SHAPE_2D = (PUZZLE_SIZE, PUZZLE_SIZE)
-    SHAPE_3D = (PUZZLE_SIZE, PUZZLE_SIZE, PUZZLE_DEPTH)
+    PUZZLE_SIZE: int = 9
+    PUZZLE_DEPTH: int = 9
+    SHAPE_2D: Tuple[int, int] = (PUZZLE_SIZE, PUZZLE_SIZE)
+    SHAPE_3D: Tuple[int, int, int] = (PUZZLE_SIZE, PUZZLE_SIZE, PUZZLE_DEPTH)
     
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes the SudokuSolver class."""
         pass
 
-    def print_puzzle(self, puzzle: Union[str, int], solution: Optional[str] = None) -> None:
+    @staticmethod
+    def print_puzzle(puzzle: Union[str, int], solution: Optional[str] = None) -> None:
         """Prints a sudoku puzzle and its solution in a formatted way.
 
         Args:
@@ -78,8 +78,8 @@ class SudokuSolver:
         # Print the final formatted sudoku grid
         print('\n'.join(replace_chars(line) for line in output))
     
-
-    def _validate_solution(self, candidate_solution: np.ndarray) -> bool:
+    @staticmethod
+    def _validate_solution(candidate_solution: np.ndarray) -> bool:
         """Check if a Sudoku solution is valid.
 
         Validates a 9x9x9 3D array representing a Sudoku puzzle solution. Each layer in the third dimension 
@@ -123,7 +123,8 @@ class SudokuSolver:
     
         return True
     
-    def validate_solution(self, candidate_solution: Union[str, List[str]]) -> bool:
+    @staticmethod
+    def validate_solution(candidate_solution: Union[str, List[str]]) -> bool:
         """Converts a candidate solution from string or list format and validates it.
 
         This method first converts a candidate solution provided as a string or list into a 3D NumPy array, 
@@ -142,10 +143,11 @@ class SudokuSolver:
         if not isinstance(candidate_solution, (str, list)):
             raise TypeError('Candidate solution must be a string or a list.')
         
-        _, candidate_3d = self._string_to_np_puzzle(candidate_solution)
-        return self._validate_solution(candidate_solution=candidate_3d)
+        _, candidate_3d = Sudoku._string_to_np_puzzle(candidate_solution)
+        return Sudoku._validate_solution(candidate_solution=candidate_3d)
     
-    def _string_to_np_puzzle(self, sudoku: str) -> Tuple[np.ndarray, np.ndarray]:
+    @staticmethod
+    def _string_to_np_puzzle(sudoku: str) -> Tuple[np.ndarray, np.ndarray]:
         """Convert a string representing a sudoku puzzle into 2D and 3D numpy array representations.
 
         The 2D array represents the puzzle itself, and the 3D array represents the possibilities for each cell.
@@ -157,9 +159,9 @@ class SudokuSolver:
             Tuple[np.ndarray, np.ndarray]: A tuple containing the 2D puzzle array and the 3D possibilities array.
         """
         # Convert the string to a 2D numpy array
-        puzzle_2d: np.ndarray = np.reshape(np.array(list(sudoku), dtype=np.uint8), 
-                                           newshape=SudokuSolver.SHAPE_2D)
-        options_3d: np.ndarray = np.zeros(SudokuSolver.SHAPE_3D, dtype=np.uint8) # [row][column][depth]
+        puzzle_2d: np.ndarray = np.reshape(np.fromiter(sudoku, dtype='l'), 
+                                           newshape=Sudoku.SHAPE_2D)
+        options_3d: np.ndarray = np.zeros(Sudoku.SHAPE_3D, dtype='l') # [row][column][depth]
         
         # Update options_3d based on the non-zero values in puzzle_2d
         nonzero_indices = np.nonzero(puzzle_2d)        
@@ -172,7 +174,8 @@ class SudokuSolver:
         
         return puzzle_2d, options_3d
 
-    def _np_puzzle_to_string(self, np_puzzle: np.ndarray) -> str:
+    @staticmethod
+    def _np_puzzle_to_string(np_puzzle: np.ndarray) -> str:
         """Converts a 3D NumPy array representing a Sudoku puzzle into a string.
 
         This method takes a 3D NumPy array where each 2D slice along the third axis represents
@@ -194,14 +197,15 @@ class SudokuSolver:
         """
         if not isinstance(np_puzzle, np.ndarray) or len(np_puzzle.shape) != 3:
             raise ValueError('The input must be a 3D NumPy array representing a Sudoku puzzle.')
-        if np_puzzle.shape != SudokuSolver.SHAPE_3D:
-            raise ValueError(f'Expected puzzle shape {SudokuSolver.SHAPE_3D}, but got {np_puzzle.shape}.')
+        if np_puzzle.shape != Sudoku.SHAPE_3D:
+            raise ValueError(f'Expected puzzle shape {Sudoku.SHAPE_3D}, but got {np_puzzle.shape}.')
 
         # Convert the 3D possibilities array into a 1D string representation
         puzzle_string: str = ''.join(map(str, (np_puzzle.argmax(axis=2) + 1).flatten()))
         return puzzle_string
-         
-    def _generate_cell_index_updates(self, *iterables: Iterable[int]) -> Generator[Tuple[Tuple[None, int], ...], None, None]:
+    
+    @staticmethod
+    def _generate_cell_index_updates(*iterables: Iterable[int]) -> Generator[Tuple[Tuple[None, int], ...], None, None]:
         """Yields unique combinations of cell indices for updating a Sudoku puzzle's possibilities.
 
         This generator function yields the indices of the cells in the Sudoku possibilities cube
@@ -226,8 +230,172 @@ class SudokuSolver:
             # Yield indices that are different from the previous combination
             yield tuple((p, c) for c, p in zip(comb, prev_comb) if c != p)
             prev_comb = comb
-      
-    def solve(self, unsolved_sudoku: str, max_iterations: int = 10_000_000) -> Optional[str]:
+    
+    @staticmethod
+    def _apply_elimination(puzzle_2d: np.ndarray, 
+                           options_3d: np.ndarray
+                           ) -> Tuple[bool, bool, np.ndarray, np.ndarray]:
+        """
+        Apply basic elimination rules to the Sudoku puzzle until no further progress is made.
+
+        This method iteratively applies Sudoku elimination rules to the given puzzle.
+        It updates the puzzle state and the options cube until the puzzle is solved
+        or no more progress can be made.
+
+        Args:
+            puzzle_2d: A 2D NumPy array representing the current state of the Sudoku puzzle.
+            options_3d: A 3D NumPy array representing the possible values for each cell.
+
+        Returns:
+            A tuple containing:
+            - has_progress: A boolean indicating if progress was made in the last iteration.
+            - is_solved: A boolean indicating if the puzzle is solved.
+            - puzzle_2d: The updated 2D puzzle state.
+            - options_3d: The updated 3D options cube.
+        """
+        
+        i = 0
+        has_progress = False 
+        is_solved = False
+
+        while True:
+            # Store the previous state of the puzzle to detect changes
+            prev_puzzle_2d = puzzle_2d
+            # Find the indices of cells with known values
+            known_cells = np.argwhere(puzzle_2d)
+            
+            # Extract row and column indices, and adjust values for 0-indexing
+            rows, cols = known_cells[:, 0], known_cells[:, 1]
+            values = puzzle_2d[rows, cols] - 1
+
+            # Eliminate options based on known cell values
+            options_3d[rows, :, values] = 0
+            options_3d[:, cols, values] = 0
+            box_start_rows, box_start_cols = 3 * (rows // 3), 3 * (cols // 3)
+            for box_start_row, box_start_col, value in zip(box_start_rows, box_start_cols, values):
+                options_3d[box_start_row:box_start_row+3, box_start_col:box_start_col+3, value] = 0
+
+            # Set known cells back to one
+            options_3d[rows, cols, values] = 1
+
+            # Update the puzzle state based on the options cube
+            puzzle_2d = options_3d.argmax(axis=2) + 1
+            # Reset cells with multiple options to zero
+            puzzle_2d[options_3d.sum(axis=2) != 1] = 0
+
+            i += 1
+
+            # Check for changes in the puzzle state to determine progress
+            if np.array_equal(puzzle_2d, prev_puzzle_2d):  # TODO: Change to 3D? (better flow then with "solved")
+                if i > 1: 
+                    has_progress = True
+                else:
+                    has_progress = False
+                break
+            
+            # Check if the puzzle is solved
+            if puzzle_2d.sum() == 405:
+                is_solved = True
+                break
+        
+        return has_progress, is_solved, puzzle_2d, options_3d
+    
+    @staticmethod
+    def _apply_hidden_singles(puzzle_2d: np.ndarray, 
+                             options_3d: np.ndarray
+                           ) -> Tuple[bool, bool, np.ndarray, np.ndarray]:
+        """
+        Apply the 'hidden singles' rule to the Sudoku puzzle until no further progress is made.
+
+        # This method iteratively applies Sudoku elimination rules to the given puzzle.
+        # It updates the puzzle state and the options cube until the puzzle is solved
+        # or no more progress can be made.
+
+        Args:
+            puzzle_2d: A 2D NumPy array representing the current state of the Sudoku puzzle.
+            options_3d: A 3D NumPy array representing the possible values for each cell.
+
+        Returns:
+            A tuple containing:
+            - has_progress: A boolean indicating if progress was made in the last iteration.
+            - is_solved: A boolean indicating if the puzzle is solved.
+            - puzzle_2d: The updated 2D puzzle state.
+            - options_3d: The updated 3D options cube.
+        """
+        # Store the previous state of the puzzle to detect changes
+        prev_puzzle_2d = puzzle_2d
+
+        # Compute columns with singles
+        cols_w_singles = np.argwhere((options_3d.sum(axis=0) == 1)) # 3d
+        # Compute the row on which the single is found
+        row_indices = options_3d.argmax(axis=0)
+        # Singles from columns
+        singles = {(row_indices[c,v], c, v) for c, v in cols_w_singles}
+        
+        # Compute rows with singles
+        rows_w_singles = np.argwhere((options_3d.sum(axis=1) == 1)) # 3d
+        # Compute the colum on which the single is found
+        col_indices = options_3d.argmax(axis=1)
+        # Singles from rows
+        singles.update({(r, col_indices[r,v], v) for r, v in rows_w_singles})
+        
+
+        for x in range(0, 9, 3):
+            for y in range(0, 9, 3):
+                # Compute row on which single is found
+                row_idx = np.argmax(options_3d[y:y+3, x:x+3, :].sum(axis=1), axis=0)
+
+                # Compute column on which single is found
+                column_agg = options_3d[y:y+3, x:x+3, :].sum(axis=0)
+                col_idx = np.argmax(column_agg, axis=0)
+
+                # Compute depth on which single is found
+                depth_idx = np.argwhere(column_agg.sum(axis=0) == 1)
+
+                # Singles from this subsquare
+                singles.update({(r[0]+y, c[0]+x, v[0]) for r, c, v in zip(row_idx[depth_idx], col_idx[depth_idx], depth_idx)})
+
+        # Compute already known values
+        known_values = {(*kv, puzzle_2d[*kv]-1) for kv in np.argwhere(puzzle_2d)}
+        
+        # Compute hidden singles
+        hidden_singles = singles - known_values
+
+        rows, cols, values = zip(*hidden_singles)
+        rows = np.array(rows)
+        cols = np.array(cols)
+        values = np.array(values)
+
+        # Set column, row, and box to zero for all known cells
+        options_3d[rows, :, values] = 0
+        options_3d[:, cols, values] = 0
+        options_3d[rows, cols, :] = 0
+        box_start_rows, box_start_cols = 3 * (rows // 3), 3 * (cols // 3)
+        for box_start_row, box_start_col, value in zip(box_start_rows, box_start_cols, values):
+            options_3d[box_start_row:box_start_row+3, box_start_col:box_start_col+3, value] = 0
+
+        # Set known cells back to one
+        options_3d[rows, cols, values] = 1
+
+        puzzle_2d = options_3d.argmax(axis=2) + 1
+        puzzle_2d[options_3d.sum(axis=2) != 1] = 0
+
+        # Check for changes in the puzzle state to determine progress
+        if np.array_equal(puzzle_2d, prev_puzzle_2d): # TODO: Change to 3D?  (better flow then with "solved")
+            has_progress = False
+        else:
+            has_progress = True
+                
+        # Check if the puzzle is solved
+        if puzzle_2d.sum() == 405:
+            is_solved = True
+        else:
+            is_solved = False
+        
+        return has_progress, is_solved, puzzle_2d, options_3d
+    
+    @staticmethod
+    def solve(unsolved_sudoku: str, max_iterations: int = 10_000_000) -> Optional[str]:
         """Solves a Sudoku puzzle.
 
         Solves the Sudoku puzzle by pruning candidates based on filled values until no further
@@ -246,39 +414,36 @@ class SudokuSolver:
         Raises:
             ValueError: If the provided Sudoku string is not valid.
         """
-        puzzle_2d, options_3d = self._string_to_np_puzzle(unsolved_sudoku)
+        puzzle_2d, options_3d = Sudoku._string_to_np_puzzle(unsolved_sudoku)
 
+        i = 0
         while True:
-            prev_puzzle_2d = puzzle_2d
-            known_cells = np.argwhere(puzzle_2d)
-            
-            rows, cols = known_cells[:, 0], known_cells[:, 1]
-            values = puzzle_2d[rows, cols] - 1
-
-            # Set column, row, and box to zero for all known cells
-            options_3d[rows, :, values] = 0
-            options_3d[:, cols, values] = 0
-            box_start_rows, box_start_cols = 3 * (rows // 3), 3 * (cols // 3)
-            for box_start_row, box_start_col, value in zip(box_start_rows, box_start_cols, values):
-                options_3d[box_start_row:box_start_row+3, box_start_col:box_start_col+3, value] = 0
-
-            # Set known cells back to one
-            options_3d[rows, cols, values] = 1
-
-            puzzle_2d = options_3d.argmax(axis=2) + 1
-            puzzle_2d[options_3d.sum(axis=2) != 1] = 0
-
-            if np.array_equal(puzzle_2d, prev_puzzle_2d):
+            i += 1
+            has_progress, is_solved, puzzle_2d, options_3d = Sudoku._apply_elimination(puzzle_2d, options_3d)
+            if is_solved:
                 break
+            elif not has_progress and i > 1:
+                break
+            # has_progress is true --> down
+            # is_solved --> break
+            # not has progress --> break
 
-            if puzzle_2d.sum() == 405:
-                return self._np_puzzle_to_string(options_3d)
-        
+
+            has_progress, is_solved, puzzle_2d, options_3d = Sudoku._apply_hidden_singles(puzzle_2d, options_3d)
+            if is_solved:
+                break
+            elif has_progress:
+                continue # Begin again up
+
+
+        if is_solved:
+            return Sudoku._np_puzzle_to_string(options_3d)
+
         num_possibilities: int = options_3d.sum(axis=2).prod()
 
         # Return answer if only one possibility left
         if num_possibilities == 1:
-            return self._np_puzzle_to_string(options_3d)
+            return Sudoku._np_puzzle_to_string(options_3d)
 
         if num_possibilities >= max_iterations or num_possibilities < 0:
             logging.info(f'More than {max_iterations:_} combinations to check, aborting...')
@@ -289,7 +454,7 @@ class SudokuSolver:
         options_idx
 
         # Create the generator
-        generator = self._generate_cell_index_updates(*options_idx)
+        generator = Sudoku._generate_cell_index_updates(*options_idx)
 
         # Set-up first option
         for idx in next(generator): 
@@ -297,8 +462,8 @@ class SudokuSolver:
             options_3d[*idx[1]] = 1
         
         # Return first option if valid
-        if self._validate_solution(options_3d):
-            return self._np_puzzle_to_string(options_3d)
+        if Sudoku._validate_solution(options_3d):
+            return Sudoku._np_puzzle_to_string(options_3d)
 
         # Iterate over other options
         for changes in generator:
@@ -306,8 +471,8 @@ class SudokuSolver:
                 options_3d[*idx[0]] = 0
                 options_3d[*idx[1]] = 1
             
-            if self._validate_solution(options_3d):
-                return self._np_puzzle_to_string(options_3d)
+            if Sudoku._validate_solution(options_3d):
+                return Sudoku._np_puzzle_to_string(options_3d)
         
         return None
 
@@ -316,7 +481,9 @@ def main():
     file_name = 'sudokus_100k_sub_1mio.csv'
     df = pd.read_csv(os.path.join(directory, file_name))
 
-    sudoku_solver = SudokuSolver()
+    sudoku_solver = Sudoku()
+
+    test_new = False
 
     def process_row(row):
         max_it = 5_000_000
@@ -325,25 +492,38 @@ def main():
         solve_time = time.perf_counter() - start_time if solution else None
         valid = solution == row['solutions']
 
-        # start_time = time.perf_counter()
-        # solution_alt = sudoku_solver.solve_2progress(unsolved_sudoku=row['quizzes'], max_iterations=max_it)
-        # solve_time_alt = time.perf_counter() - start_time if solution else None
-        # valid_alt = solution == row['solutions']
-
-        return pd.Series([solution, solve_time, valid])#, solution_str, solve_time_str, valid_str])
-        # return pd.Series([solution, solve_time, valid, solution_alt, solve_time_alt, valid_alt])
+        if test_new:
+            start_time = time.perf_counter()
+            solution_new = sudoku_solver.solve_new(unsolved_sudoku=row['quizzes'], max_iterations=max_it)
+            solve_time_new = time.perf_counter() - start_time if solution else None
+            valid_new = solution == row['solutions']
+            return pd.Series([solution, solve_time, valid, solution_new, solve_time_new, valid_new])
+        else:
+            return pd.Series([solution, solve_time, valid])
 
     # Apply the function to each row with a progress bar
     tqdm.pandas()
-    # df[['solution', 'solve_time', 'valid', 'solution_alt', 'solve_time_alt', 'valid_alt']] = df.progress_apply(process_row, axis=1)
-    df[['solution', 'solve_time', 'valid']] = df.progress_apply(process_row, axis=1)
 
-    print(f"Valid solutions:\t{all(df[df['solution'].notna()]['valid'])}")
-    # print(f"Valid alt. solutions:\t{all(df[df['solution_alt'].notna()]['valid_alt'])}")
+    start_full_data = time.perf_counter()
+
+    if test_new:
+        df[['solution', 'solve_time', 'valid', 'solution_new', 'solve_time_new', 'valid_new']] = df.progress_apply(process_row, axis=1)
+        # df[['solution', 'solve_time', 'valid', 'solution_new', 'solve_time_new', 'valid_new']] = df.apply(process_row, axis=1)
+        print(f"Valid alt. solutions:\t{all(df[df['solution_alt'].notna()]['valid_alt'])}")
+    else:
+        df[['solution', 'solve_time', 'valid']] = df.progress_apply(process_row, axis=1)
+        # df[['solution', 'solve_time', 'valid']] = df.apply(process_row, axis=1)
+        print(f"Valid solutions:\t{all(df[df['solution'].notna()]['valid'])}")
+
+    solve_time_full_data =  time.perf_counter() - start_full_data 
 
     print(f'\nTiming results:')
-    print(df[['solve_time']].describe())
-    # print(df[['solve_time', 'solve_time_alt']].describe())
+    print(f'\nTotal time: {solve_time_full_data:.4}')
+
+    if test_new:
+        print(df[['solve_time', 'solve_time_alt']].describe())
+    else:
+        print(df[['solve_time']].describe())
 
 if __name__ == "__main__":
     import os
