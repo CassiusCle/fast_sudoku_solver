@@ -264,6 +264,7 @@ class Sudoku:
         while True:
             # Store the previous state of the puzzle to detect changes
             prev_puzzle_2d = puzzle_2d
+            # prev_options_3d = options_3d.copy()
             # Find the indices of cells with known values
             known_cells = np.argwhere(puzzle_2d)
             
@@ -289,6 +290,7 @@ class Sudoku:
             i += 1
 
             # Check for changes in the puzzle state to determine progress
+            # if np.array_equal(options_3d, prev_options_3d): # TODO: Change to 3D?  (better flow then with "solved")
             if np.array_equal(puzzle_2d, prev_puzzle_2d):  # TODO: Change to 3D? (better flow then with "solved")
                 if i > 1: 
                     has_progress = True
@@ -326,6 +328,7 @@ class Sudoku:
             - options_3d: The updated 3D options cube.
         """
         # Store the previous state of the puzzle to detect changes
+        # prev_options_3d = options_3d.copy()
         prev_puzzle_2d = puzzle_2d
 
         # Compute columns with singles
@@ -390,6 +393,7 @@ class Sudoku:
         puzzle_2d[options_3d.sum(axis=2) != 1] = 0
 
         # Check for changes in the puzzle state to determine progress
+        # if np.array_equal(options_3d, prev_options_3d): # TODO: Change to 3D?  (better flow then with "solved")
         if np.array_equal(puzzle_2d, prev_puzzle_2d): # TODO: Change to 3D?  (better flow then with "solved")
             has_progress = False
         else:
@@ -453,6 +457,8 @@ class Sudoku:
         # Return answer if only one possibility left
         if num_possibilities == 1:
             return Sudoku._np_puzzle_to_string(options_3d)
+        # elif num_possibilities > 1_000_000:
+        #     print(f'Many possibilities:\n\t{num_possibilities}\n')
 
         if num_possibilities >= max_iterations or num_possibilities < 0:
             logging.info(f'More than {max_iterations:_} combinations to check, aborting...')
@@ -517,7 +523,7 @@ class Sudoku:
         return num_possibilities
 
 def main():
-    directory = 'data'
+    directory = '../data'
     # file_name = 'sudokus_100k_sub_1mio.csv'
     file_name = 'sudokus_difficult_sub_1mio.csv'
     df = pd.read_csv(os.path.join(directory, file_name))
