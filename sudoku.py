@@ -158,6 +158,9 @@ class Sudoku:
         Returns:
             Tuple[np.ndarray, np.ndarray]: A tuple containing the 2D puzzle array and the 3D possibilities array.
         """
+        if '.' in sudoku:
+            sudoku = sudoku.replace('.', '0')
+
         # Convert the string to a 2D numpy array
         puzzle_2d: np.ndarray = np.reshape(np.fromiter(sudoku, dtype='l'), 
                                            newshape=Sudoku.SHAPE_2D)
@@ -359,9 +362,15 @@ class Sudoku:
         known_values = {(*kv, puzzle_2d[*kv]-1) for kv in np.argwhere(puzzle_2d)}
         
         # Compute hidden singles
-        hidden_singles = singles - known_values
+        hidden_singles: set = singles - known_values
 
-        rows, cols, values = zip(*hidden_singles)
+        # Return in case there are no hidden singles
+        if not hidden_singles:
+            has_progress = False
+            is_solved = False
+            return has_progress, is_solved, puzzle_2d, options_3d
+
+        rows, cols, values = zip(*hidden_singles)            
         rows = np.array(rows)
         cols = np.array(cols)
         values = np.array(values)
@@ -439,7 +448,7 @@ class Sudoku:
         if is_solved:
             return Sudoku._np_puzzle_to_string(options_3d)
 
-        num_possibilities: int = options_3d.sum(axis=2).prod()
+        num_possibilities: int = options_3d.sum(axis=2, dtype=np.longdouble).prod()
 
         # Return answer if only one possibility left
         if num_possibilities == 1:
@@ -475,10 +484,42 @@ class Sudoku:
                 return Sudoku._np_puzzle_to_string(options_3d)
         
         return None
+    
+
+    @staticmethod
+    def dev_compute_possibilities(unsolved_sudoku: str) -> int:
+        """
+        Compute possibilities 
+        """
+        puzzle_2d, options_3d = Sudoku._string_to_np_puzzle(unsolved_sudoku)
+
+        i = 0
+        while True:
+            i += 1
+            has_progress, is_solved, puzzle_2d, options_3d = Sudoku._apply_elimination(puzzle_2d, options_3d)
+            if is_solved:
+                break
+            elif not has_progress and i > 1:
+                break
+            # has_progress is true --> down
+            # is_solved --> break
+            # not has progress --> break
+
+
+            has_progress, is_solved, puzzle_2d, options_3d = Sudoku._apply_hidden_singles(puzzle_2d, options_3d)
+            if is_solved:
+                break
+            elif has_progress:
+                continue # Begin again up
+
+        num_possibilities: int = options_3d.sum(axis=2, dtype=np.longdouble).prod()
+
+        return num_possibilities
 
 def main():
     directory = 'data'
-    file_name = 'sudokus_100k_sub_1mio.csv'
+    # file_name = 'sudokus_100k_sub_1mio.csv'
+    file_name = 'sudokus_difficult_sub_1mio.csv'
     df = pd.read_csv(os.path.join(directory, file_name))
 
     sudoku_solver = Sudoku()
