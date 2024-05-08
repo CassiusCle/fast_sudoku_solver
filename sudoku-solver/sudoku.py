@@ -6,7 +6,7 @@ import numpy as np
 
 from utils import (validate_3D_solution, iter_to_np_puzzle, np_puzzle_to_string, 
                    generate_cell_index_updates)
-from techniques import apply_elimination, apply_hidden_singles
+from techniques import apply_constraint_propagation
 
 # Set up logging configuration  
 logging.basicConfig(level=logging.WARNING, format='%(levelname)s: %(message)s') 
@@ -54,8 +54,7 @@ class Sudoku:
             raise TypeError(f'Expected str, list or numpy.ndarray, but got {type(candidate_solution).__name__}.')
 
         return validate_3D_solution(candidate_solution=candidate_solution)
-    
-    
+
     @staticmethod
     def solve(unsolved_sudoku: Iterable, max_iterations: int = 10_000_000) -> Optional[str]:
         """Solves a Sudoku puzzle.
@@ -78,26 +77,8 @@ class Sudoku:
         """
         puzzle_2d, options_3d = iter_to_np_puzzle(unsolved_sudoku)
 
-        i = 0
-        while True:
-            i += 1
-            has_progress, is_solved, puzzle_2d, options_3d = apply_elimination(puzzle_2d, options_3d)
-            if is_solved:
-                break
-            elif not has_progress and i > 1:
-                break
-            # has_progress is true --> down
-            # is_solved --> break
-            # not has progress --> break
-
-
-            has_progress, is_solved, puzzle_2d, options_3d = apply_hidden_singles(puzzle_2d, options_3d)
-            if is_solved:
-                break
-            elif has_progress:
-                continue # Begin again up
-
-
+        is_solved, puzzle_2d, options_3d = apply_constraint_propagation(puzzle_2d, options_3d)
+    
         if is_solved:
             return np_puzzle_to_string(options_3d)
 
@@ -140,32 +121,35 @@ class Sudoku:
         
         return None
     
-
     @staticmethod
     def dev_compute_possibilities(unsolved_sudoku: str) -> int:
         """
-        Compute possibilities 
+        Compute the total number of possible value combinations for an unsolved Sudoku puzzle.
+
+        This static method takes an unsolved Sudoku puzzle in string format, converts it to a 2D NumPy array
+        representing the puzzle state, and a 3D NumPy array representing the possible values for each cell.
+        It then applies constraint propagation to reduce the number of possibilities and computes the product
+        of the sums of possible values for each cell, which represents the total number of combinations.
+
+        Args:
+            unsolved_sudoku: A string representation of the unsolved Sudoku puzzle, where each character
+                             represents a cell value (1-9) or a placeholder for an unknown value (typically '0' or '.').
+
+        Returns:
+            The total number of possible value combinations for the given unsolved Sudoku puzzle as an integer.
         """
+        
+        # Convert the input string to NumPy arrays for the puzzle state and possible values
         puzzle_2d, options_3d = iter_to_np_puzzle(unsolved_sudoku)
 
-        i = 0
-        while True:
-            i += 1
-            has_progress, is_solved, puzzle_2d, options_3d = apply_elimination(puzzle_2d, options_3d)
-            if is_solved:
-                break
-            elif not has_progress and i > 1:
-                break
-
-            has_progress, is_solved, puzzle_2d, options_3d = apply_hidden_singles(puzzle_2d, options_3d)
-            if is_solved:
-                break
-            elif has_progress:
-                continue # Begin again up
-
+        # Apply constraint propagation to reduce the number of possibilities
+        _, puzzle_2d, options_3d = apply_constraint_propagation(puzzle_2d, options_3d)
+    
+        # Compute the product of the sums of possible values for each cell
         num_possibilities: int = options_3d.sum(axis=2, dtype=np.longdouble).prod()
 
         return num_possibilities
+
 
 def main():
     directory = '../data'

@@ -102,9 +102,13 @@ def validate_3D_solution(candidate_solution: np.ndarray) -> bool:
 
 
 def iter_to_np_puzzle(sudoku: str) -> Tuple[np.ndarray, np.ndarray]:
-    """Convert an iterable representing a sudoku puzzle into 2D and 3D numpy array representations.
+    """Convert an iterable representing a sudoku puzzle into 2D and 3D NumPy array representations.
 
-    The 2D array represents the puzzle itself, and the 3D array represents the possibilities for each cell.
+    The 2D NumPy array represents the current state of the Sudoku puzzle.
+        Each cell contains the value of the puzzle (1-9) or 0 if the value is unknown.
+    The 3D NumPy array representing the possible values for each cell.
+        The first two dimensions correspond to the puzzle grid, and the third dimension
+        contains a binary indicator for the possible values (1-9).
 
     Args:
         sudoku (str): A string representing a sudoku puzzle.
