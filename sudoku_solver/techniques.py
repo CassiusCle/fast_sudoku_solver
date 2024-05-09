@@ -4,120 +4,6 @@ from typing import Tuple, Set
 
 import numpy as np
 
-
-def apply_constraint_propagation(
-    puzzle_2d: np.ndarray, options_3d: np.ndarray
-) -> Tuple[bool, np.ndarray, np.ndarray]:
-    """
-    Apply constraint propagation techniques to a Sudoku puzzle.
-
-    This function applies two constraint propagation techniques: elimination and hidden singles.
-    It iterates over these techniques to progressively reduce the number of possible values for each
-    cell in the puzzle until the puzzle is solved or no further progress can be made.
-
-    Args:
-        puzzle_2d:  A 2D NumPy array representing the current state of the Sudoku puzzle.
-                    Each cell contains the value of the puzzle (1-9) or 0 if the value is unknown.
-        options_3d: A 3D NumPy array representing the possible values for each cell.
-                    The first two dimensions correspond to the puzzle grid, and the third dimension
-                    contains a binary indicator for the possible values (1-9).
-
-    Returns:
-        A tuple containing:
-        - is_solved: A boolean indicating if the puzzle is solved.
-        - puzzle_2d: The updated 2D puzzle state.
-        - options_3d: The updated 3D options cube.
-
-    Raises:
-        ValueError: If the input arrays do not meet the required shapes or value constraints.
-    """
-
-    # Validate the input arrays
-    if not (isinstance(puzzle_2d, np.ndarray) and puzzle_2d.ndim == 2):
-        raise ValueError("puzzle_2d must be a 2D NumPy array.")
-    if not (isinstance(options_3d, np.ndarray) and options_3d.ndim == 3):
-        raise ValueError("options_3d must be a 3D NumPy array.")
-
-    iteration_count: int = 0
-    while True:
-        iteration_count += 1
-        # Apply elimination technique
-        has_progress, is_solved, puzzle_2d, options_3d = _apply_elimination(
-            puzzle_2d, options_3d
-        )
-        if is_solved:
-            break
-
-        if not has_progress and iteration_count > 1:
-            break
-
-        # Apply hidden singles technique
-        has_progress, is_solved, puzzle_2d, options_3d = _apply_hidden_singles(
-            puzzle_2d, options_3d
-        )
-        if is_solved:
-            break
-
-        if has_progress:
-            continue  # Restart the loop to apply elimination again
-
-    return is_solved, puzzle_2d, options_3d
-
-
-def _apply_elimination(
-    puzzle_2d: np.ndarray, options_3d: np.ndarray
-) -> Tuple[bool, bool, np.ndarray, np.ndarray]:
-    """
-    Apply basic elimination rules to the Sudoku puzzle until no further progress is made.
-
-    This method iteratively applies Sudoku elimination rules to the given puzzle.
-    It updates the puzzle state and the options cube until the puzzle is solved
-    or no more progress can be made.
-
-    Args:
-        puzzle_2d: A 2D NumPy array representing the current state of the Sudoku puzzle.
-        options_3d: A 3D NumPy array representing the possible values for each cell.
-
-    Returns:
-        A tuple containing:
-        - has_progress: A boolean indicating if progress was made in the last iteration.
-        - is_solved: A boolean indicating if the puzzle is solved.
-        - puzzle_2d: The updated 2D puzzle state.
-        - options_3d: The updated 3D options cube.
-    """
-    is_solved: bool = False
-
-    iteration_count: int = 0
-    while True:
-        iteration_count += 1
-
-        # Store the previous state of the puzzle to detect changes
-        prev_puzzle_2d = puzzle_2d
-        # prev_options_3d = options_3d.copy()
-        # Find the indices of cells with known values
-        known_cells = np.argwhere(puzzle_2d)
-
-        # Extract row and column indices, and adjust values for 0-indexing
-        rows, cols = known_cells[:, 0], known_cells[:, 1]
-        values = puzzle_2d[rows, cols] - 1
-
-        # Update puzzle based on known values
-        puzzle_2d, options_3d = _update_puzzle(rows, cols, values, options_3d)
-
-        # Check for changes in the puzzle state and break out if no progress was made this iteration
-        has_progress = not np.array_equal(puzzle_2d, prev_puzzle_2d)
-        if not has_progress:
-            has_progress = iteration_count > 1
-            break
-
-        # Check if the puzzle is solved and breakout if it is
-        is_solved = np.all(puzzle_2d > 0)
-        if is_solved:
-            break
-
-    return has_progress, is_solved, puzzle_2d, options_3d
-
-
 def _find_singles(options_3d: np.ndarray) -> Set[Tuple[int, int, int]]:
     """
     Find all unique options for digits in rows, columns, or subsquares of a Sudoku puzzle.
@@ -237,6 +123,58 @@ def _update_puzzle(
 
     return puzzle_2d, options_3d
 
+def _apply_elimination(
+    puzzle_2d: np.ndarray, options_3d: np.ndarray
+) -> Tuple[bool, bool, np.ndarray, np.ndarray]:
+    """
+    Apply basic elimination rules to the Sudoku puzzle until no further progress is made.
+
+    This method iteratively applies Sudoku elimination rules to the given puzzle.
+    It updates the puzzle state and the options cube until the puzzle is solved
+    or no more progress can be made.
+
+    Args:
+        puzzle_2d: A 2D NumPy array representing the current state of the Sudoku puzzle.
+        options_3d: A 3D NumPy array representing the possible values for each cell.
+
+    Returns:
+        A tuple containing:
+        - has_progress: A boolean indicating if progress was made in the last iteration.
+        - is_solved: A boolean indicating if the puzzle is solved.
+        - puzzle_2d: The updated 2D puzzle state.
+        - options_3d: The updated 3D options cube.
+    """
+    is_solved: bool = False
+
+    iteration_count: int = 0
+    while True:
+        iteration_count += 1
+
+        # Store the previous state of the puzzle to detect changes
+        prev_puzzle_2d = puzzle_2d
+        # prev_options_3d = options_3d.copy()
+        # Find the indices of cells with known values
+        known_cells = np.argwhere(puzzle_2d)
+
+        # Extract row and column indices, and adjust values for 0-indexing
+        rows, cols = known_cells[:, 0], known_cells[:, 1]
+        values = puzzle_2d[rows, cols] - 1
+
+        # Update puzzle based on known values
+        puzzle_2d, options_3d = _update_puzzle(rows, cols, values, options_3d)
+
+        # Check for changes in the puzzle state and break out if no progress was made this iteration
+        has_progress = not np.array_equal(puzzle_2d, prev_puzzle_2d)
+        if not has_progress:
+            has_progress = iteration_count > 1
+            break
+
+        # Check if the puzzle is solved and breakout if it is
+        is_solved = np.all(puzzle_2d > 0)
+        if is_solved:
+            break
+
+    return has_progress, is_solved, puzzle_2d, options_3d
 
 def _apply_hidden_singles(
     puzzle_2d: np.ndarray, options_3d: np.ndarray
@@ -277,3 +215,61 @@ def _apply_hidden_singles(
     is_solved: bool = np.all(puzzle_2d > 0)
 
     return has_progress, is_solved, puzzle_2d, options_3d
+
+def apply_constraint_propagation(
+    puzzle_2d: np.ndarray, options_3d: np.ndarray
+) -> Tuple[bool, np.ndarray, np.ndarray]:
+    """
+    Apply constraint propagation techniques to a Sudoku puzzle.
+
+    This function applies two constraint propagation techniques: elimination and hidden singles.
+    It iterates over these techniques to progressively reduce the number of possible values for each
+    cell in the puzzle until the puzzle is solved or no further progress can be made.
+
+    Args:
+        puzzle_2d:  A 2D NumPy array representing the current state of the Sudoku puzzle.
+                    Each cell contains the value of the puzzle (1-9) or 0 if the value is unknown.
+        options_3d: A 3D NumPy array representing the possible values for each cell.
+                    The first two dimensions correspond to the puzzle grid, and the third dimension
+                    contains a binary indicator for the possible values (1-9).
+
+    Returns:
+        A tuple containing:
+        - is_solved: A boolean indicating if the puzzle is solved.
+        - puzzle_2d: The updated 2D puzzle state.
+        - options_3d: The updated 3D options cube.
+
+    Raises:
+        ValueError: If the input arrays do not meet the required shapes or value constraints.
+    """
+
+    # Validate the input arrays
+    if not (isinstance(puzzle_2d, np.ndarray) and puzzle_2d.ndim == 2):
+        raise ValueError("puzzle_2d must be a 2D NumPy array.")
+    if not (isinstance(options_3d, np.ndarray) and options_3d.ndim == 3):
+        raise ValueError("options_3d must be a 3D NumPy array.")
+
+    iteration_count: int = 0
+    while True:
+        iteration_count += 1
+        # Apply elimination technique
+        has_progress, is_solved, puzzle_2d, options_3d = _apply_elimination(
+            puzzle_2d, options_3d
+        )
+        if is_solved:
+            break
+
+        if not has_progress and iteration_count > 1:
+            break
+
+        # Apply hidden singles technique
+        has_progress, is_solved, puzzle_2d, options_3d = _apply_hidden_singles(
+            puzzle_2d, options_3d
+        )
+        if is_solved:
+            break
+
+        if has_progress:
+            continue  # Restart the loop to apply elimination again
+
+    return is_solved, puzzle_2d, options_3d

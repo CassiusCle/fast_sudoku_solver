@@ -31,7 +31,8 @@ class Sudoku:
     def validate_solution(
         candidate_solution: Union[str, List[str], np.ndarray]
     ) -> bool:
-        """Checks if a candidate solution for the Sudoku puzzle is valid.
+        """
+        Checks if a candidate solution for the Sudoku puzzle is valid.
 
         This method first checks the type and converts candidate solution if
         provided as a string or list into a 3D NumPy array, then validates the
@@ -74,7 +75,8 @@ class Sudoku:
     def solve(
         unsolved_sudoku: Iterable, max_iterations: int = 10_000_000
     ) -> Optional[str]:
-        """Solves a Sudoku puzzle.
+        """
+        Solves a Sudoku puzzle.
 
         Solves the Sudoku puzzle by pruning candidates based on filled values until no further
         reduction is possible. If only one combination is left, it returns the solution.
@@ -83,11 +85,11 @@ class Sudoku:
         Args:
             unsolved_sudoku (str): The unsolved Sudoku puzzle in string format.
             max_iterations (int, optional): The maximum number of iterations to attempt before
-                                             aborting. Defaults to 10,000,000.
+                                            aborting. Defaults to 10,000,000.
 
         Returns:
-            str: The solved Sudoku puzzle in string format, or None if a solution cannot be found
-                 within the maximum number of iterations.
+            str:    The solved Sudoku puzzle in string format, or None if a solution cannot be found
+                    within the maximum number of iterations.
 
         Raises:
             ValueError: If the provided Sudoku string is not valid.
