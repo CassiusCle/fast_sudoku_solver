@@ -2,7 +2,10 @@ from typing import Tuple
 
 import numpy as np
 
-def apply_constraint_propagation(puzzle_2d: np.ndarray, options_3d: np.ndarray) -> Tuple[bool, np.ndarray, np.ndarray]:
+
+def apply_constraint_propagation(
+    puzzle_2d: np.ndarray, options_3d: np.ndarray
+) -> Tuple[bool, np.ndarray, np.ndarray]:
     """
     Apply constraint propagation techniques to a Sudoku puzzle.
 
@@ -29,32 +32,38 @@ def apply_constraint_propagation(puzzle_2d: np.ndarray, options_3d: np.ndarray) 
 
     # Validate the input arrays
     if not (isinstance(puzzle_2d, np.ndarray) and puzzle_2d.ndim == 2):
-        raise ValueError('puzzle_2d must be a 2D NumPy array.')
+        raise ValueError("puzzle_2d must be a 2D NumPy array.")
     if not (isinstance(options_3d, np.ndarray) and options_3d.ndim == 3):
-        raise ValueError('options_3d must be a 3D NumPy array.')
-    
+        raise ValueError("options_3d must be a 3D NumPy array.")
+
     iteration_count = 0
     while True:
         iteration_count += 1
         # Apply elimination technique
-        has_progress, is_solved, puzzle_2d, options_3d = _apply_elimination(puzzle_2d, options_3d)
+        has_progress, is_solved, puzzle_2d, options_3d = _apply_elimination(
+            puzzle_2d, options_3d
+        )
         if is_solved:
             break
         elif not has_progress and iteration_count > 1:
             break
-        
+
         # Apply hidden singles technique
-        has_progress, is_solved, puzzle_2d, options_3d = _apply_hidden_singles(puzzle_2d, options_3d)
+        has_progress, is_solved, puzzle_2d, options_3d = _apply_hidden_singles(
+            puzzle_2d, options_3d
+        )
         if is_solved:
             break
-        elif has_progress:
-            continue # Restart the loop to apply elimination again
-    
+
+        if has_progress:
+            continue  # Restart the loop to apply elimination again
+
     return is_solved, puzzle_2d, options_3d
 
-def _apply_elimination(puzzle_2d: np.ndarray, 
-                        options_3d: np.ndarray
-                        ) -> Tuple[bool, bool, np.ndarray, np.ndarray]:
+
+def _apply_elimination(
+    puzzle_2d: np.ndarray, options_3d: np.ndarray
+) -> Tuple[bool, bool, np.ndarray, np.ndarray]:
     """
     Apply basic elimination rules to the Sudoku puzzle until no further progress is made.
 
@@ -73,9 +82,9 @@ def _apply_elimination(puzzle_2d: np.ndarray,
         - puzzle_2d: The updated 2D puzzle state.
         - options_3d: The updated 3D options cube.
     """
-    
+
     i = 0
-    has_progress = False 
+    has_progress = False
     is_solved = False
 
     while True:
@@ -84,7 +93,7 @@ def _apply_elimination(puzzle_2d: np.ndarray,
         # prev_options_3d = options_3d.copy()
         # Find the indices of cells with known values
         known_cells = np.argwhere(puzzle_2d)
-        
+
         # Extract row and column indices, and adjust values for 0-indexing
         rows, cols = known_cells[:, 0], known_cells[:, 1]
         values = puzzle_2d[rows, cols] - 1
@@ -93,8 +102,14 @@ def _apply_elimination(puzzle_2d: np.ndarray,
         options_3d[rows, :, values] = 0
         options_3d[:, cols, values] = 0
         box_start_rows, box_start_cols = 3 * (rows // 3), 3 * (cols // 3)
-        for box_start_row, box_start_col, value in zip(box_start_rows, box_start_cols, values):
-            options_3d[box_start_row:box_start_row+3, box_start_col:box_start_col+3, value] = 0
+        for box_start_row, box_start_col, value in zip(
+            box_start_rows, box_start_cols, values
+        ):
+            options_3d[
+                box_start_row : box_start_row + 3,
+                box_start_col : box_start_col + 3,
+                value,
+            ] = 0
 
         # Set known cells back to one
         options_3d[rows, cols, values] = 1
@@ -108,23 +123,26 @@ def _apply_elimination(puzzle_2d: np.ndarray,
 
         # Check for changes in the puzzle state to determine progress
         # if np.array_equal(options_3d, prev_options_3d): # TODO: Change to 3D?  (better flow then with "solved")
-        if np.array_equal(puzzle_2d, prev_puzzle_2d):  # TODO: Change to 3D? (better flow then with "solved")
-            if i > 1: 
+        if np.array_equal(
+            puzzle_2d, prev_puzzle_2d
+        ):  # TODO: Change to 3D? (better flow then with "solved")
+            if i > 1:
                 has_progress = True
             else:
                 has_progress = False
             break
-        
+
         # Check if the puzzle is solved
         if puzzle_2d.sum() == 405:
             is_solved = True
             break
-    
+
     return has_progress, is_solved, puzzle_2d, options_3d
 
-def _apply_hidden_singles(puzzle_2d: np.ndarray, 
-                            options_3d: np.ndarray
-                        ) -> Tuple[bool, bool, np.ndarray, np.ndarray]:
+
+def _apply_hidden_singles(
+    puzzle_2d: np.ndarray, options_3d: np.ndarray
+) -> Tuple[bool, bool, np.ndarray, np.ndarray]:
     """
     Apply the 'hidden singles' rule to the Sudoku puzzle until no further progress is made.
 
@@ -148,38 +166,44 @@ def _apply_hidden_singles(puzzle_2d: np.ndarray,
     prev_puzzle_2d = puzzle_2d
 
     # Compute columns with singles
-    cols_w_singles = np.argwhere((options_3d.sum(axis=0) == 1)) # 3d
+    cols_w_singles = np.argwhere((options_3d.sum(axis=0) == 1))  # 3d
     # Compute the row on which the single is found
     row_indices = options_3d.argmax(axis=0)
     # Singles from columns
-    singles = {(row_indices[c,v], c, v) for c, v in cols_w_singles}
-    
+    singles = {(row_indices[c, v], c, v) for c, v in cols_w_singles}
+
     # Compute rows with singles
-    rows_w_singles = np.argwhere((options_3d.sum(axis=1) == 1)) # 3d
+    rows_w_singles = np.argwhere((options_3d.sum(axis=1) == 1))  # 3d
     # Compute the colum on which the single is found
     col_indices = options_3d.argmax(axis=1)
     # Singles from rows
-    singles.update({(r, col_indices[r,v], v) for r, v in rows_w_singles})
-    
+    singles.update({(r, col_indices[r, v], v) for r, v in rows_w_singles})
 
     for x in range(0, 9, 3):
         for y in range(0, 9, 3):
             # Compute row on which single is found
-            row_idx = np.argmax(options_3d[y:y+3, x:x+3, :].sum(axis=1), axis=0)
+            row_idx = np.argmax(options_3d[y : y + 3, x : x + 3, :].sum(axis=1), axis=0)
 
             # Compute column on which single is found
-            column_agg = options_3d[y:y+3, x:x+3, :].sum(axis=0)
+            column_agg = options_3d[y : y + 3, x : x + 3, :].sum(axis=0)
             col_idx = np.argmax(column_agg, axis=0)
 
             # Compute depth on which single is found
             depth_idx = np.argwhere(column_agg.sum(axis=0) == 1)
 
             # Singles from this subsquare
-            singles.update({(r[0]+y, c[0]+x, v[0]) for r, c, v in zip(row_idx[depth_idx], col_idx[depth_idx], depth_idx)})
+            singles.update(
+                {
+                    (r[0] + y, c[0] + x, v[0])
+                    for r, c, v in zip(
+                        row_idx[depth_idx], col_idx[depth_idx], depth_idx
+                    )
+                }
+            )
 
     # Compute already known values
-    known_values = {(*kv, puzzle_2d[*kv]-1) for kv in np.argwhere(puzzle_2d)}
-    
+    known_values = {(*kv, puzzle_2d[*kv] - 1) for kv in np.argwhere(puzzle_2d)}
+
     # Compute hidden singles
     hidden_singles: set = singles - known_values
 
@@ -189,7 +213,7 @@ def _apply_hidden_singles(puzzle_2d: np.ndarray,
         is_solved = False
         return has_progress, is_solved, puzzle_2d, options_3d
 
-    rows, cols, values = zip(*hidden_singles)            
+    rows, cols, values = zip(*hidden_singles)
     rows = np.array(rows)
     cols = np.array(cols)
     values = np.array(values)
@@ -199,8 +223,12 @@ def _apply_hidden_singles(puzzle_2d: np.ndarray,
     options_3d[:, cols, values] = 0
     options_3d[rows, cols, :] = 0
     box_start_rows, box_start_cols = 3 * (rows // 3), 3 * (cols // 3)
-    for box_start_row, box_start_col, value in zip(box_start_rows, box_start_cols, values):
-        options_3d[box_start_row:box_start_row+3, box_start_col:box_start_col+3, value] = 0
+    for box_start_row, box_start_col, value in zip(
+        box_start_rows, box_start_cols, values
+    ):
+        options_3d[
+            box_start_row : box_start_row + 3, box_start_col : box_start_col + 3, value
+        ] = 0
 
     # Set known cells back to one
     options_3d[rows, cols, values] = 1
@@ -210,15 +238,17 @@ def _apply_hidden_singles(puzzle_2d: np.ndarray,
 
     # Check for changes in the puzzle state to determine progress
     # if np.array_equal(options_3d, prev_options_3d): # TODO: Change to 3D?  (better flow then with "solved")
-    if np.array_equal(puzzle_2d, prev_puzzle_2d): # TODO: Change to 3D?  (better flow then with "solved")
+    if np.array_equal(
+        puzzle_2d, prev_puzzle_2d
+    ):  # TODO: Change to 3D?  (better flow then with "solved")
         has_progress = False
     else:
         has_progress = True
-            
+
     # Check if the puzzle is solved
     if puzzle_2d.sum() == 405:
         is_solved = True
     else:
         is_solved = False
-    
+
     return has_progress, is_solved, puzzle_2d, options_3d
