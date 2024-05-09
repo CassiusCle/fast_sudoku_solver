@@ -1,3 +1,5 @@
+"""TODO: Module docstring"""
+
 import itertools
 from typing import Generator, Iterable, Iterator, Union, Tuple, Optional
 
