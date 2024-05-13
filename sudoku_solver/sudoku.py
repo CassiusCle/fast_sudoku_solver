@@ -23,16 +23,16 @@ import logging
 from typing import List, Optional, Union
 
 import pandas as pd
-from tqdm import tqdm
+# from tqdm import tqdm
 import numpy as np
 
-from utils import (
+from sudoku_solver.utils import (
     validate_3d_solution,
     iter_to_np_puzzle,
     np_puzzle_to_string,
     generate_cell_index_updates,
 )
-from techniques import apply_constraint_propagation
+from sudoku_solver.techniques import apply_constraint_propagation
 
 # Set up logging configuration
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")

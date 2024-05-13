@@ -1,4 +1,19 @@
-"""TODO: Module docstring"""
+"""  
+The `utils` module contains utility functions that assist in the solving of Sudoku puzzles.   
+These functions include conversions between different representations of Sudoku puzzles,   
+validation of solutions, and printing of puzzles for visualization.  
+  
+The module provides essential functionalities such as `iter_to_np_puzzle` which transforms   
+a string representation of a Sudoku puzzle into a 2D array (the puzzle itself) and a 3D array   
+(the potential values for each cell). The `np_puzzle_to_string` function performs the inverse   
+operation, converting the 3D array representation back into a string format. The `validate_3d_solution`   
+function ensures that a given solution adheres to the rules of Sudoku. The `generate_cell_index_updates`   
+function creates a generator for efficiently iterating through the possible updates to a Sudoku puzzle during solving.  
+  
+Together, these utilities support the primary solving mechanism by providing data transformation   
+and validation capabilities.  
+"""  
+
 
 import itertools
 from typing import Generator, Iterable, Iterator, Union, Tuple, Optional
