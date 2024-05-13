@@ -1,9 +1,26 @@
-"""TODO: Module docstring"""
+"""  
+This module provides a Sudoku class with methods to solve Sudoku puzzles using  
+constraint propagation techniques. The class includes functionalities to validate  
+solutions, solve puzzles, and compute the number of possible value combinations  
+for an unsolved Sudoku puzzle. The module also contains a main function that  
+benchmarks the solver's performance on a dataset of puzzles.  
+  
+The Sudoku solver relies on NumPy for numerical computations and pandas for  
+processing CSV files containing Sudoku puzzles and their solutions. The solver  
+employs a combination of constraint propagation and brute force search to find  
+valid solutions, with an option to limit the number of iterations for the brute  
+force search.  
+  
+Typical usage example:  
+    sudoku_solver = Sudoku()  
+    solution = sudoku_solver.solve(unsolved_sudoku="...puzzle_string...")  
+    is_valid = sudoku_solver.validate_solution(candidate_solution=solution)  
+"""  
 
 import os
 import time
 import logging
-from typing import Iterable, List, Optional, Union
+from typing import List, Optional, Union
 
 import pandas as pd
 from tqdm import tqdm
@@ -52,7 +69,7 @@ class Sudoku:
         TODO: Add case for 2D Puzzle
         """
         if not isinstance(candidate_solution, (str, list, np.ndarray)):
-            raise TypeError("Candidate solution must be a string or a list.")
+            raise TypeError("Candidate solution must be a string, list or np.ndarray.")
 
         if isinstance(candidate_solution, (str, list)):
             _, candidate_solution = iter_to_np_puzzle(candidate_solution)
@@ -73,7 +90,7 @@ class Sudoku:
 
     @staticmethod
     def solve(
-        unsolved_sudoku: Iterable, max_iterations: int = 10_000_000
+        unsolved_sudoku: Union[str, List[str]], max_iterations: int = 10_000_000
     ) -> Optional[str]:
         """
         Solves a Sudoku puzzle.
@@ -83,7 +100,7 @@ class Sudoku:
         Otherwise, it attempts to brute force solutions.
 
         Args:
-            unsolved_sudoku (str): The unsolved Sudoku puzzle in string format.
+            unsolved_sudoku (str): The unsolved Sudoku puzzle in string or list format
             max_iterations (int, optional): The maximum number of iterations to attempt before
                                             aborting. Defaults to 10,000,000.
 
@@ -108,8 +125,6 @@ class Sudoku:
         # Return answer if only one possibility left
         if num_possibilities == 1:
             return np_puzzle_to_string(options_3d)
-        # elif num_possibilities > 1_000_000:
-        #     print(f'Many possibilities:\n\t{num_possibilities}\n')
 
         if num_possibilities >= max_iterations or num_possibilities < 0:
             logging.info(
