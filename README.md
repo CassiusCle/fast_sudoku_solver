@@ -4,29 +4,6 @@
   
 This Sudoku Solver is a Python program designed to solve 9x9 Sudoku puzzles using constraint propagation techniques combined with brute force search when necessary. The solver leverages the power of NumPy for numerical computations and provides a command-line interface for easy interaction.  
   
-## Project Structure  
-  
-The project consists of the following files and directories:  
-  
-
-Sudoku_Solver<br>
-│<br>
-├── sudoku_solver/<br>
-│ ├── init.py<br>
-│ ├── sudoku.py # Main module containing the Sudoku class and solving logic.<br>
-│ ├── techniques.py # Implements various Sudoku solving techniques.<br>
-│ └── utils.py # Utility functions for puzzle transformation and validation.<br>
-│<br>
-├── tests/<br>
-│ ├── init.py<br>
-│ ├── test_sudoku.py # Unit tests for sudoku.py.<br>
-│ ├── test_techniques.py # Unit tests for techniques.py.<br>
-│ └── test_utils.py # Unit tests for utils.py.<br>
-│<br>
-├── .gitignore # Specifies files to be ignored by version control.<br>
-└── README.md # The document you are currently reading.<br>
-
-  
 ## Installation  
   
 To run the Sudoku Solver, you will need Python 3.6 or higher. Clone the repository to your local machine:  
