@@ -35,7 +35,7 @@ from sudoku_solver.utils import (
 from sudoku_solver.techniques import apply_constraint_propagation
 
 # Set up logging configuration
-logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
+logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
 
 
 class Sudoku:
