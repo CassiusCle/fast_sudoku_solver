@@ -1,7 +1,7 @@
 """  
-This module implements various Sudoku solving techniques used within the Sudoku solver.   
-These techniques include finding singles, hidden singles, and applying elimination strategies   
-to reduce the options for each cell in the puzzle. The functions within this module   
+This module implements various Sudoku solving techniques used within the Sudoku solver.
+These techniques include finding singles, hidden singles, and applying elimination strategies
+to reduce the options for each cell in the puzzle. The functions within this module
 work in tandem with the Sudoku class in the `sudoku.py` module to solve puzzles.  
   
 The techniques are built upon the representation of the Sudoku grid as a 3D NumPy array,   
@@ -27,9 +27,9 @@ def _find_singles(options_3d: np.ndarray) -> Set[Tuple[int, int, int]]:
     constraint propagation process in solving a Sudoku puzzle.
 
     Args:
-        options_3d: A 3D NumPy array representing the possible values for each cell in the Sudoku puzzle.
-                    The first two dimensions correspond to the puzzle grid, and the third dimension
-                    contains a binary indicator for the possible values (1-9).
+        options_3d: A 3D NumPy array representing the possible values for each cell in the Sudoku
+                    puzzle. The first two dimensions correspond to the puzzle grid, and the third
+                    dimension contains a binary indicator for the possible values (1-9).
 
     Returns:
         A set of tuples, where each tuple contains the row index, column index, and value index
