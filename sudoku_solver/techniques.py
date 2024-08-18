@@ -12,7 +12,8 @@ of the puzzle.
 
 The solving strategy is based on iteratively applying these techniques to prune the   
 set of possible values for each cell until the puzzle is solved or no further progress can be made.  
-"""  
+"""
+
 from typing import Tuple, Set
 
 import numpy as np

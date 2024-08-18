@@ -14,7 +14,6 @@ Together, these utilities support the primary solving mechanism by providing dat
 and validation capabilities.  
 """  
 
-
 import itertools
 from typing import Generator, Iterable, Iterator, Union, Tuple, Optional
 
