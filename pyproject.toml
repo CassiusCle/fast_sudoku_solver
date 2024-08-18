@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "sudoku_solver"
+version = "0.1"
+description = "A Python Sudoku Solver for 9x9 puzzles using constraint propagation and brute force, powered by NumPy with a command-line interface."
+authors = ["CassiusCle <https://github.com/CassiusCle>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/CassiusCle/sudoku_solver"
+packages = [
+    {include = "sudoku_solver"}
+]
+
+[tool.poetry.dependencies]
+python = "3.11"
+numpy = "1.26.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
