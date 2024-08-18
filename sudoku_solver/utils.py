@@ -30,8 +30,8 @@ def print_puzzle(puzzle: Union[str, int], solution: Optional[str] = None) -> Non
     """Prints a sudoku puzzle and its solution in a formatted way.
 
     Args:
-        puzzle: A string or integer representing the initial sudoku puzzle.
-        solution: An optional string representing the solution to the puzzle.
+        puzzle (str): A string or integer representing the initial sudoku puzzle.
+        solution (str): An optional string representing the solution to the puzzle.
     """
 
     # Convert puzzle numbers to letters for readability to distinguish from solution values later

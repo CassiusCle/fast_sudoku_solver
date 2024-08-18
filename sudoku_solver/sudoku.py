@@ -23,7 +23,6 @@ import logging
 from typing import List, Optional, Union
 
 import pandas as pd
-# from tqdm import tqdm
 import numpy as np
 
 from sudoku_solver.utils import (
@@ -36,7 +35,6 @@ from sudoku_solver.techniques import apply_constraint_propagation
 
 # Set up logging configuration
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
-
 
 class Sudoku:
     """A class for solving 9x9 Sudoku puzzles."""
@@ -128,11 +126,11 @@ class Sudoku:
 
         if num_possibilities >= max_iterations or num_possibilities < 0:
             logging.info(
-                "More than %s combinations to check, aborting...",
-                format(max_iterations, "_"),
+                f"More than {max_iterations:_} combinations to check, aborting..."
             )
             return None
-
+        
+        # List options for each cell
         it = np.nditer(puzzle_2d, flags=["multi_index"])
         options_idx = [
             [
@@ -143,7 +141,7 @@ class Sudoku:
             if v == 0
         ]
 
-        # Create the generator
+        # Create the generator that iterates over the possible cell index updates
         generator = generate_cell_index_updates(*options_idx)
 
         # Set-up first option
