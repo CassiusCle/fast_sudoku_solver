@@ -7,14 +7,14 @@ def solve_and_print(puzzle_number: str, puzzle: str) -> None:
     """ Solves a Sudoku puzzle and prints the unsolved and solved versions. """
     print(f"Solving puzzle no. {puzzle_number}", end="\n")
     print("Unsolved puzzle:")
-    print_puzzle(puzzle)
+    print_puzzle(puzzle=puzzle)
 
     try:
         solution = Sudoku.solve(puzzle)
         print("Solved puzzle:")
         print_puzzle(puzzle=puzzle, solution=solution)
     except Exception as e:
-        print(f"An error occurred while solving the puzzle: {e}")
+        print(f"An error occurred while solving  and printing the puzzle: {e}")
 
 def main() -> None:
     """ Main function to load and solve example Sudoku puzzles. """
@@ -31,17 +31,17 @@ if __name__ == "__main__":
 # > Solving puzzle no. 124
 # > Unsolved puzzle:
 # > ┌─────────┬─────────┬─────────┐
-# > │ .  . (7)│ .  .  . │ .  .  . │
-# > │ .  . (5)│ . (4) . │ . (7) . │
-# > │ . (6)(9)│(5) .  . │ . (3)(1)│
+# > │ .  .  7 │ .  .  . │ .  .  . │
+# > │ .  .  5 │ .  4  . │ .  7  . │
+# > │ .  6  9 │ 5  .  . │ .  3  1 │
 # > ├─────────┼─────────┼─────────┤
-# > │ .  .  . │(4) . (5)│(8) . (2)│
-# > │ . (5) . │ . (2) . │ . (4) . │
-# > │(6) . (2)│(3) . (1)│ .  .  . │
+# > │ .  .  . │ 4  .  5 │ 8  .  2 │
+# > │ .  5  . │ .  2  . │ .  4  . │
+# > │ 6  .  2 │ 3  .  1 │ .  .  . │
 # > ├─────────┼─────────┼─────────┤
-# > │(2)(9) . │ .  . (3)│(5)(8) . │
-# > │ . (3) . │ . (1) . │(2) .  . │
-# > │ .  .  . │ .  .  . │(3) .  . │
+# > │ 2  9  . │ .  .  3 │ 5  8  . │
+# > │ .  3  . │ .  1  . │ 2  .  . │
+# > │ .  .  . │ .  .  . │ 3  .  . │
 # > └─────────┴─────────┴─────────┘
 # > Solved puzzle:
 # > ┌─────────┬─────────┬─────────┐
