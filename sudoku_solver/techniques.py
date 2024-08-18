@@ -3,17 +3,16 @@ This module implements various Sudoku solving techniques used within the Sudoku 
 These techniques include finding singles, hidden singles, and applying elimination strategies
 to reduce the options for each cell in the puzzle. The functions within this module
 work in tandem with the Sudoku class in the `sudoku.py` module to solve puzzles.  
-  
+
 The techniques are built upon the representation of the Sudoku grid as a 3D NumPy array,   
 where the third dimension represents the possible numbers that can occupy a cell. The   
 module provides a higher-level function `apply_constraint_propagation` which encapsulates   
 the application of all the implemented techniques in a sequence that facilitates the solving   
 of the puzzle.  
-  
+
 The solving strategy is based on iteratively applying these techniques to prune the   
 set of possible values for each cell until the puzzle is solved or no further progress can be made.  
 """  
-
 from typing import Tuple, Set
 
 import numpy as np

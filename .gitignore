@@ -12,3 +12,5 @@ venv.bak/
 local_testing/
 data/
 __pycache__/
+
+dist/

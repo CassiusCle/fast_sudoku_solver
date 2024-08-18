@@ -2,14 +2,14 @@
 The `utils` module contains utility functions that assist in the solving of Sudoku puzzles.   
 These functions include conversions between different representations of Sudoku puzzles,   
 validation of solutions, and printing of puzzles for visualization.  
-  
+
 The module provides essential functionalities such as `iter_to_np_puzzle` which transforms   
 a string representation of a Sudoku puzzle into a 2D array (the puzzle itself) and a 3D array   
 (the potential values for each cell). The `np_puzzle_to_string` function performs the inverse   
 operation, converting the 3D array representation back into a string format. The `validate_3d_solution`   
 function ensures that a given solution adheres to the rules of Sudoku. The `generate_cell_index_updates`   
 function creates a generator for efficiently iterating through the possible updates to a Sudoku puzzle during solving.  
-  
+
 Together, these utilities support the primary solving mechanism by providing data transformation   
 and validation capabilities.  
 """  
@@ -26,22 +26,28 @@ SHAPE_2D: Tuple[int, int] = (PUZZLE_SIZE, PUZZLE_SIZE)
 SHAPE_3D: Tuple[int, int, int] = (PUZZLE_SIZE, PUZZLE_SIZE, PUZZLE_DEPTH)
 
 
-def print_puzzle(puzzle: Union[str, int], solution: Optional[str] = None) -> None:
+def print_puzzle(puzzle: Union[str, int] = None, solution: Optional[str] = None) -> None:
     """Prints a sudoku puzzle and its solution in a formatted way.
+    
+    If a solution is provided, the puzzle will be overlaid with the solution to show the solved puzzle.
 
     Args:
-        puzzle: A string or integer representing the initial sudoku puzzle.
-        solution: An optional string representing the solution to the puzzle.
+        puzzle (str): A string or integer representing the initial sudoku puzzle.
+        solution (str): An optional string representing the solution to the puzzle.
     """
 
     # Convert puzzle numbers to letters for readability to distinguish from solution values later
     alphabet = "abcdefghi"
-    puzzle = "".join(
-        [alphabet[int(c) - 1] if c not in [".", "0"] else c for c in str(puzzle)]
-    )
+    if puzzle is not None:    
+        puzzle = "".join(
+            [alphabet[int(c) - 1] if c not in [".", "0"] else c for c in str(puzzle)]
+        )
+    else:
+        puzzle = "." * 81
+    
 
     # Overlay solution onto puzzle if provided
-    if solution:
+    if solution is not None:
         puzzle = "".join(
             [c1 if c1.isalpha() else c2 for c1, c2 in zip(puzzle, solution)]
         )
@@ -75,14 +81,21 @@ def print_puzzle(puzzle: Union[str, int], solution: Optional[str] = None) -> Non
     # Helper function to replace characters with formatted numbers
     def replace_chars(chars: str) -> str:
         """Replaces characters in the puzzle output with formatted numbers."""
-        return "".join(
-            (
-                f"({alphabet.index(c) + 1})"
-                if c.isalpha()
-                else " . " if c in [".", "0"] else f" {c} " if c.isdigit() else c
-            )
-            for c in chars
-        )
+        
+        formatted_chars = []
+        for c in chars:
+            if c.isalpha():
+                if solution is None:
+                    formatted_chars.append(f" {alphabet.index(c) + 1} ")
+                else:    
+                    formatted_chars.append(f"({alphabet.index(c) + 1})")
+            elif c in [".", "0"]:
+                formatted_chars.append(" . ")
+            elif c.isdigit():
+                formatted_chars.append(f" {c} ")
+            else:
+                formatted_chars.append(c)
+        return "".join(formatted_chars)
 
     # Print the final formatted sudoku grid
     print("\n".join(replace_chars(line) for line in output))

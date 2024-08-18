@@ -23,7 +23,6 @@ import logging
 from typing import List, Optional, Union
 
 import pandas as pd
-# from tqdm import tqdm
 import numpy as np
 
 from sudoku_solver.utils import (
@@ -36,7 +35,6 @@ from sudoku_solver.techniques import apply_constraint_propagation
 
 # Set up logging configuration
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
-
 
 class Sudoku:
     """A class for solving 9x9 Sudoku puzzles."""
@@ -128,11 +126,11 @@ class Sudoku:
 
         if num_possibilities >= max_iterations or num_possibilities < 0:
             logging.info(
-                "More than %s combinations to check, aborting...",
-                format(max_iterations, "_"),
+                f"More than {max_iterations:_} combinations to check, aborting..."
             )
             return None
-
+        
+        # List options for each cell
         it = np.nditer(puzzle_2d, flags=["multi_index"])
         options_idx = [
             [
@@ -143,7 +141,7 @@ class Sudoku:
             if v == 0
         ]
 
-        # Create the generator
+        # Create the generator that iterates over the possible cell index updates
         generator = generate_cell_index_updates(*options_idx)
 
         # Set-up first option
@@ -197,83 +195,3 @@ class Sudoku:
         num_possibilities: int = options_3d.sum(axis=2, dtype=np.longdouble).prod()
 
         return num_possibilities
-
-
-def main():
-    directory = "../data"
-    # file_name = 'sudokus_100k_sub_1mio.csv'
-    file_name = "sudokus_difficult_sub_1mio.csv"
-    df = pd.read_csv(os.path.join(directory, file_name))
-
-    sudoku_solver = Sudoku()
-
-    test_new = False
-
-    def process_row(row):
-        max_it = 5_000_000
-        start_time = time.perf_counter()
-        solution = sudoku_solver.solve(
-            unsolved_sudoku=row["quizzes"], max_iterations=max_it
-        )
-        solve_time = time.perf_counter() - start_time if solution else None
-        valid = solution == row["solutions"]
-
-        if test_new:
-            start_time = time.perf_counter()
-            solution_new = sudoku_solver.solve_new(
-                unsolved_sudoku=row["quizzes"], max_iterations=max_it
-            )
-            solve_time_new = time.perf_counter() - start_time if solution else None
-            valid_new = solution == row["solutions"]
-            return pd.Series(
-                [solution, solve_time, valid, solution_new, solve_time_new, valid_new]
-            )
-        else:
-            return pd.Series([solution, solve_time, valid])
-
-    # Apply the function to each row with a progress bar
-    tqdm.pandas()
-
-    start_full_data = time.perf_counter()
-
-    if test_new:
-        df[
-            [
-                "solution",
-                "solve_time",
-                "valid",
-                "solution_new",
-                "solve_time_new",
-                "valid_new",
-            ]
-        ] = df.progress_apply(process_row, axis=1)
-        # df[['solution', 'solve_time', 'valid', 'solution_new', 'solve_time_new', 'valid_new']] = df.apply(process_row, axis=1)
-        print(
-            f"Valid alt. solutions:\t{all(df[df['solution_alt'].notna()]['valid_alt'])}"
-        )
-    else:
-        df[["solution", "solve_time", "valid"]] = df.progress_apply(process_row, axis=1)
-        # df[['solution', 'solve_time', 'valid']] = df.apply(process_row, axis=1)
-        print(f"Valid solutions:\t{all(df[df['solution'].notna()]['valid'])}")
-
-    solve_time_full_data = time.perf_counter() - start_full_data
-
-    print("\nTiming results:")
-    print(f"\nTotal time: {solve_time_full_data:.4}")
-
-    if test_new:
-        print(df[["solve_time", "solve_time_alt"]].describe())
-    else:
-        print(df[["solve_time"]].describe())
-
-
-if __name__ == "__main__":
-    # import argparse
-    # parser = argparse.ArgumentParser(description="A simple script that greets the user.")
-    # parser.add_argument("--data_size", default="10k", help="The name of the person to greet.")
-    # args = parser.parse_args()
-
-    # NOTE: Profiling: python -m cProfile -o output.pstats -s time sudoku.py
-    # python -m pstats output.pstats
-    main()
-    # main(args)
