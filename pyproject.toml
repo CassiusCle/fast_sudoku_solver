@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sudoku_solver"
-version = "0.1"
+version = "1.0.0"
 description = "A Python Sudoku Solver for 9x9 puzzles using constraint propagation and brute force, powered by NumPy with a command-line interface."
 authors = ["CassiusCle <https://github.com/CassiusCle>"]
 license = "MIT"
