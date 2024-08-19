@@ -24,13 +24,13 @@ from typing import List, Optional, Union
 import pandas as pd
 import numpy as np
 
-from sudoku_solver.utils import (
+from fast_sudoku_solver.utils import (
     validate_3d_solution,
     iter_to_np_puzzle,
     np_puzzle_to_string,
     generate_cell_index_updates,
 )
-from sudoku_solver.techniques import apply_constraint_propagation
+from fast_sudoku_solver.techniques import apply_constraint_propagation
 
 # Set up logging configuration
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")

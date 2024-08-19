@@ -1,5 +1,5 @@
-from sudoku_solver.sudoku import Sudoku
-from sudoku_solver.utils import print_puzzle
+from fast_sudoku_solver.sudoku import Sudoku
+from fast_sudoku_solver.utils import print_puzzle
 from examples.sudoku_puzzles import example_sudokus
 
 # Function to solve and print a Sudoku puzzle

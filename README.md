@@ -9,14 +9,14 @@ To run the Sudoku Solver, you will need Python 3.11 or higher. You can install i
 
 ### Option 1: Install from PyPI using pip
 ```bash 
-pip install sudoku_solver
+pip install fast_sudoku_solver
 ```
 
 ### Option 2: Clone the repository
 Clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/cassiuscle/Sudoku_Solver.git
+git clone https://github.com/CassiusCle/fast_sudoku_solver
 cd sudoku_solver
 ```
 
