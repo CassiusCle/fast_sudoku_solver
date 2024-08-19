@@ -17,7 +17,6 @@ Clone the repository to your local machine:
 
 ```bash
 git clone https://github.com/CassiusCle/fast_sudoku_solver
-cd sudoku_solver
 ```
 
 Install the required dependencies:
@@ -46,7 +45,7 @@ The code examples below show a few of the functionalities of the package. Please
 
 #### Solving a Sudoku
 ```python 
-from sudoku_solver.sudoku import Sudoku  
+from fast_sudoku_solver.sudoku import Sudoku  
  
 unsolved_puzzle = "..7........5.4..7..695...31...4.58.2.5..2..4.6.23.1...29...358..3..1.2........3.."
 solution: str = sudoku_solver.solve(puzzle) 
@@ -63,7 +62,7 @@ print("Is the solution valid?", is_valid)
 
 #### Printing a Sudoku in a formatted grid
 ```python 
-from sudoku_solver.utils import print_puzzle
+from fast_sudoku_solver.utils import print_puzzle
 
 print_puzzle(puzzle=unsolved_puzzle)
 
