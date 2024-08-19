@@ -5,7 +5,7 @@
 This Sudoku Solver is a Python program designed to solve 9x9 Sudoku puzzles using constraint propagation techniques combined with brute force search when necessary. The solver leverages the power of NumPy for numerical computations, making it highly performant for a Python based solver.
   
 ## Installation  
-To run the Sudoku Solver, you will need Python 3.11 or higher. You can install it in one of two ways:
+To run the Sudoku Solver, you will need Python 3.9 or higher. You can install it in one of two ways:
 
 ### Option 1: Install from PyPI using pip
 ```bash 
@@ -24,7 +24,7 @@ Install the required dependencies:
 pip install -r requirements.txt
 ```
 
-When running Sudoku Solver from the cloned repository, it is advised to still install it as a package in "editable" mode using:
+When running Sudoku Solver from the cloned repository, it is advised to install it as a package in "editable" mode using:
 ```bash
 pip install -e .
 ```
