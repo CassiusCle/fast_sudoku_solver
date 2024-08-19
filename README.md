@@ -37,7 +37,7 @@ N.B.: The solver was designed to take in Sudoku puzzles in the form of strings. 
 ### Command line
 To run the Sudoku Solver from the command-line, simply run a command like below with your unsolved Sudoku:
 ```bash
-python -m sudoku_solver ..7........5.4..7..695...31...4.58.2.5..2..4.6.23.1...29...358..3..1.2........3..
+python -m fast_sudoku_solver ..7........5.4..7..695...31...4.58.2.5..2..4.6.23.1...29...358..3..1.2........3..
 ```
 
 ```bash

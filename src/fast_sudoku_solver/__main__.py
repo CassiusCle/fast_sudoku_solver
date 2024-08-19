@@ -1,18 +1,18 @@
 """  
 This module serves as the entry point for the sudoku_solver package.  
- 
+
 It allows users to solve Sudoku puzzles provided as a command-line argument.  
 The puzzle should be a flattened string of 81 characters where each character  
 represents a cell in the puzzle (1-9 for filled cells, '0' or '.' for empty cells).  
 
 Example usage:  
-    python -m sudoku_solver "................................................................................."  
+    python -m sudoku_solver <enter flattened Sudoku puzzle>  
 """
 
 import sys 
 
-from fast_sudoku_solver.sudoku import Sudoku
-from fast_sudoku_solver.utils import print_puzzle
+from src.fast_sudoku_solver.sudoku import Sudoku
+from src.fast_sudoku_solver.utils import print_puzzle
 
 def main() -> None:
     """  

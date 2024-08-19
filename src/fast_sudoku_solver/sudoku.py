@@ -3,34 +3,31 @@ This module provides a Sudoku class with methods to solve Sudoku puzzles using
 constraint propagation techniques. The class includes functionalities to validate  
 solutions, solve puzzles, and compute the number of possible value combinations  
 for an unsolved Sudoku puzzle.
-  
+
 The Sudoku solver relies on NumPy for numerical computations and pandas for  
 processing CSV files containing Sudoku puzzles and their solutions. The solver  
 employs a combination of constraint propagation and brute force search to find  
 valid solutions, with an option to limit the number of iterations for the brute  
 force search.  
-  
+
 Typical usage example:  
     sudoku_solver = Sudoku()  
     solution = sudoku_solver.solve(unsolved_sudoku="...puzzle_string...")  
     is_valid = sudoku_solver.validate_solution(candidate_solution=solution)  
 """  
 
-import os
-import time
 import logging
 from typing import List, Optional, Union
 
-import pandas as pd
 import numpy as np
 
-from fast_sudoku_solver.utils import (
+from src.fast_sudoku_solver.utils import (
     validate_3d_solution,
     iter_to_np_puzzle,
     np_puzzle_to_string,
     generate_cell_index_updates,
 )
-from fast_sudoku_solver.techniques import apply_constraint_propagation
+from src.fast_sudoku_solver.techniques import apply_constraint_propagation
 
 # Set up logging configuration
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")

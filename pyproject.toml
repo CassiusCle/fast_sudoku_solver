@@ -8,7 +8,7 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/CassiusCle/fast-sudoku_solver"
 packages = [
-    {include = "fast_sudoku_solver"}
+    {include = "fast_sudoku_solver", from = "src"}
 ]
 
 [tool.poetry.scripts]
