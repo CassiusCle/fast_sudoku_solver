@@ -2,8 +2,7 @@
 This module provides a Sudoku class with methods to solve Sudoku puzzles using  
 constraint propagation techniques. The class includes functionalities to validate  
 solutions, solve puzzles, and compute the number of possible value combinations  
-for an unsolved Sudoku puzzle. The module also contains a main function that  
-benchmarks the solver's performance on a dataset of puzzles.  
+for an unsolved Sudoku puzzle.
   
 The Sudoku solver relies on NumPy for numerical computations and pandas for  
 processing CSV files containing Sudoku puzzles and their solutions. The solver  
