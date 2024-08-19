@@ -40,6 +40,24 @@ To run the Sudoku Solver from the command-line, simply run a command like below 
 python -m sudoku_solver ..7........5.4..7..695...31...4.58.2.5..2..4.6.23.1...29...358..3..1.2........3..
 ```
 
+```bash
+> Solved Sudoku:
+> ┌─────────┬─────────┬─────────┐
+> │ 4  1 (7)│ 9  3  8 │ 6  2  5 │
+> │ 3  2 (5)│ 1 (4) 6 │ 9 (7) 8 │
+> │ 8 (6)(9)│(5) 7  2 │ 4 (3)(1)│
+> ├─────────┼─────────┼─────────┤
+> │ 1  7  3 │(4) 9 (5)│(8) 6 (2)│
+> │ 9 (5) 8 │ 6 (2) 7 │ 1 (4) 3 │
+> │(6) 4 (2)│(3) 8 (1)│ 7  5  9 │
+> ├─────────┼─────────┼─────────┤
+> │(2)(9) 1 │ 7  6 (3)│(5)(8) 4 │
+> │ 5 (3) 6 │ 8 (1) 4 │(2) 9  7 │
+> │ 7  8  4 │ 2  5  9 │(3) 1  6 │
+> └─────────┴─────────┴─────────┘
+> Flattened solution: 417938625325146978869572431173495862958627143642381759291763584536814297784259316
+```
+
 ### Python
 The code examples below show a few of the functionalities of the package. Please also see the `examples/example_usage.py` script and the example puzzles that are included in this repository.
 

@@ -32,7 +32,8 @@ def main() -> None:
         solution = Sudoku.solve(unsolved_sudoku=unsolved_puzzle)
         if solution:  
             print("Solved Sudoku:")  
-            print_puzzle(puzzle=unsolved_puzzle, solution=solution)  
+            print_puzzle(puzzle=unsolved_puzzle, solution=solution)
+            print(f'Flattened solution: {solution}')  
         else:  
             print("No solution has been found for the provided Sudoku puzzle.")  
             sys.exit(1)
