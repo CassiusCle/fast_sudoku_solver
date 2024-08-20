@@ -6,7 +6,7 @@ keywords = ["sudoku", "solver", "fast", "constraint", "propagation", "brute", "f
 authors = ["CassiusCle"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/CassiusCle/fast-sudoku_solver"
+repository = "https://github.com/CassiusCle/fast_sudoku_solver"
 packages = [
     {include = "fast_sudoku_solver", from = "src"}
 ]
