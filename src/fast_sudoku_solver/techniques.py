@@ -1,40 +1,47 @@
 """  
-This module implements various Sudoku solving techniques used within the Sudoku solver.
-These techniques include finding singles, hidden singles, and applying elimination strategies
-to reduce the options for each cell in the puzzle. The functions within this module
-work in tandem with the Sudoku class in the `sudoku.py` module to solve puzzles.  
+This module defines various Sudoku solving techniques and a backtracking algorithm for the `fast_sudoku_solver` package.  
+These techniques include constraint propagation methods like elimination and hidden singles, which are applied iteratively  
+to prune possible values for each cell until the puzzle is solved or no further progress can be made. The backtracking  
+algorithm is best used when constraint propagation is insufficient to solve the puzzle. Both techniques rely on a 3D NumPy 
+array representation of the puzzle for efficient computations.  
+"""  
 
-The techniques are built upon the representation of the Sudoku grid as a 3D NumPy array,   
-where the third dimension represents the possible numbers that can occupy a cell. The   
-module provides a higher-level function `apply_constraint_propagation` which encapsulates   
-the application of all the implemented techniques in a sequence that facilitates the solving   
-of the puzzle.  
-
-The solving strategy is based on iteratively applying these techniques to prune the   
-set of possible values for each cell until the puzzle is solved or no further progress can be made.  
-"""
-
-import logging
-from abc import ABC, abstractmethod
-from typing import Tuple, Set, Generator, Iterable, Iterator, Tuple
-from itertools import product
-
-import numpy as np
-
-from src.fast_sudoku_solver.services import SudokuValidator
+import logging  
+from abc import ABC, abstractmethod  
+from typing import Tuple, Set, Generator, Iterable, Iterator 
+from itertools import product  
+  
+import numpy as np  
+  
+from fast_sudoku_solver.services import SudokuValidator
 
 class SolvingStrategy(ABC):
-    # Abstract class, TODO: implement correctly
+    """Abstract base class for different Sudoku solving strategies."""  
         
     @classmethod
-    @abstractmethod
-    def apply(cls, *args, **kwargs):
-        # TODO: ADD docstring if necessary
+    @abstractmethod  
+    def apply(cls, puzzle_2d: np.ndarray, options_3d: np.ndarray, *args, **kwargs) -> Tuple[bool, np.ndarray, np.ndarray]:  
+        """Applies a solving strategy to a Sudoku puzzle.  
+  
+        Subclasses must override this method with the specific implementation of the solving strategy.  
+  
+        Args:  
+            puzzle_2d: A 2D NumPy array representing the current state of the Sudoku puzzle.  
+            options_3d: A 3D NumPy array representing the possible values for each cell.  
+            *args: Additional positional arguments for the solving strategy.  
+            **kwargs: Additional keyword arguments for the solving strategy.  
+  
+        Returns:  
+            A tuple containing:  
+            - A boolean indicating if the puzzle is solved.  
+            - The updated 2D puzzle state.  
+            - The updated 3D options cube.  
+        """  
         pass
     
     
 class ConstraintPropagation(SolvingStrategy):
-
+    """Implements constraint propagation techniques for solving Sudoku puzzles."""
 
     @classmethod
     def apply(cls, puzzle_2d: np.ndarray, options_3d: np.ndarray) -> Tuple[bool, np.ndarray, np.ndarray]:
@@ -53,10 +60,7 @@ class ConstraintPropagation(SolvingStrategy):
                         contains a binary indicator for the possible values (1-9).
 
         Returns:
-            A tuple containing:
-            - is_solved: A boolean indicating if the puzzle is solved.
-            - puzzle_2d: The updated 2D puzzle state.
-            - options_3d: The updated 3D options cube.
+            A tuple (is_solved, puzzle_2d, options_3d) indicating if the puzzle is solved and the updated puzzle state.
 
         Raises:
             ValueError: If the input arrays do not meet the required shapes or value constraints.
@@ -111,7 +115,7 @@ class ConstraintPropagation(SolvingStrategy):
             options_3d: A 3D NumPy array representing the possible values for each cell.
 
         Returns:
-            A tuple containing the updated 2D puzzle state and the updated 3D options cube.
+            A tuple (puzzle_2d, options_3d) with the updated 2D puzzle state and the updated 3D options cube.
 
         """
         # Set column, row, and block to zero for all known cells
@@ -153,14 +157,10 @@ class ConstraintPropagation(SolvingStrategy):
         constraint propagation process in solving a Sudoku puzzle.
 
         Args:
-            options_3d: A 3D NumPy array representing the possible values for each cell in the Sudoku
-                        puzzle. The first two dimensions correspond to the puzzle grid, and the third
-                        dimension contains a binary indicator for the possible values (1-9).
+            options_3d: A 3D NumPy array representing the possible values for each cell.
 
         Returns:
-            A set of tuples, where each tuple contains the row index, column index, and value index
-            of a cell that represents a unique option for that digit in its row, column, or subsquare.
-
+            A set of tuples, each tuple containing the row, column, and value index for a cell with a unique option.
         """
         singles = set()
 
@@ -201,8 +201,7 @@ class ConstraintPropagation(SolvingStrategy):
         by subtracting the known values from the set of all singles.
 
         Args:
-            singles:    A set of tuples representing cells that are the only option for a digit
-                        in their row, column, or subsquare.
+            singles:    A set of tuples representing cells with a single possible value.
             puzzle_2d:  A 2D NumPy array representing the current state of the Sudoku puzzle.
 
         Returns:
@@ -232,10 +231,10 @@ class ConstraintPropagation(SolvingStrategy):
 
         Returns:
             A tuple containing:
-            - has_progress: A boolean indicating if progress was made in the last iteration.
-            - is_solved: A boolean indicating if the puzzle is solved.
-            - puzzle_2d: The updated 2D puzzle state.
-            - options_3d: The updated 3D options cube.
+            - A boolean indicating if progress was made.  
+            - A boolean indicating if the puzzle is solved.  
+            - The updated 2D puzzle state.  
+            - The updated 3D options cube.  
         """
         is_solved: bool = False
 
@@ -282,17 +281,14 @@ class ConstraintPropagation(SolvingStrategy):
 
         Args:
             puzzle_2d:  A 2D NumPy array representing the current state of the Sudoku puzzle.
-                        Each cell contains the value of the puzzle (1-9) or 0 if the value is unknown.
             options_3d: A 3D NumPy array representing the possible values for each cell.
-                        The first two dimensions correspond to the puzzle grid, and the third dimension
-                        contains a binary indicator for the possible values (1-9).
 
         Returns:
-            A tuple containing:
-            - has_progress: A boolean indicating if progress was made in the last iteration.
-            - is_solved: A boolean indicating if the puzzle is solved.
-            - puzzle_2d: The updated 2D puzzle state.
-            - options_3d: The updated 3D options cube.
+            A tuple containing:  
+            - A boolean indicating if progress was made.  
+            - A boolean indicating if the puzzle is solved.  
+            - The updated 2D puzzle state.  
+            - The updated 3D options cube. 
 
         """
         prev_puzzle_2d = puzzle_2d.copy()
@@ -313,13 +309,21 @@ class ConstraintPropagation(SolvingStrategy):
 
 
 class Backtracking(SolvingStrategy):
+    """Implements a backtracking algorithm for solving Sudoku puzzles.""" 
     
-    def apply(cls, 
-              puzzle_2d: np.ndarray, 
-              options_3d: np.ndarray,
-              max_iterations: int = 10_000_000
-              ) -> Tuple[bool, np.ndarray, np.ndarray]:
-        # TODO: Write doctring in style of other classes.
+    def apply(
+        cls, puzzle_2d: np.ndarray, options_3d: np.ndarray, max_iterations: int = 10_000_000
+    ) -> Tuple[bool, np.ndarray, np.ndarray]:
+        """Applies a backtracking algorithm to solve a Sudoku puzzle.  
+  
+        Args:  
+            puzzle_2d: A 2D NumPy array representing the current state of the Sudoku puzzle.  
+            options_3d: A 3D NumPy array representing the possible values for each cell.  
+            max_iterations: The maximum number of iterations before aborting the search.  
+  
+        Returns:  
+            A tuple (is_solved, puzzle_2d, options_3d) indicating if the puzzle is solved and the updated puzzle state.  
+        """
     
         num_possibilities: int = options_3d.sum(axis=2, dtype=np.longdouble).prod()
 
@@ -346,7 +350,7 @@ class Backtracking(SolvingStrategy):
         ]
 
         # Create the generator that iterates over the possible cell index updates
-        generator = cls.generate_cell_index_updates(*options_idx)
+        generator = cls._generate_cell_index_updates(*options_idx)
 
         # Set-up first option
         for idx in next(generator):
@@ -366,12 +370,12 @@ class Backtracking(SolvingStrategy):
             if SudokuValidator.validate_3d_solution(options_3d):
                 return True, puzzle_2d, options_3d
             
-        logging.info(f"No solution found after {max_iterations:_} combinations checked. Closing of...")
+        logging.info(f"Maximum number of iterations ({max_iterations:_}) reached, no solution found...")
         
         return False, puzzle_2d, options_3d
 
     @staticmethod
-    def generate_cell_index_updates(
+    def _generate_cell_index_updates(
         *iterables: Iterable[int],
     ) -> Generator[Tuple[Tuple[None, int], ...], None, None]:
         """Yields unique combinations of cell indices for updating a Sudoku puzzle's possibilities.
