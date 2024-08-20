@@ -16,7 +16,7 @@ Example output:
 
 from fast_sudoku_solver.sudoku_solver import SudokuSolver
 from fast_sudoku_solver.services import SudokuFormatter
-from examples.sudoku_puzzles import example_sudokus
+from sudoku_puzzles import example_sudokus
 
 def solve_and_print(puzzle_number: int, unsolved_puzzle: str) -> None:  
     """Solves a Sudoku puzzle and prints both the unsolved and solved versions.  

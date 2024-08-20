@@ -15,7 +15,7 @@ packages = [
 sudoku_solver = "reader.__main__:main"
 
 [tool.poetry.dependencies]
-python = ">=3.9"
+python = ">=3.11"
 numpy = ">=1.23.2"
 
 [build-system]

@@ -1,4 +1,4 @@
-# `fast_sudoku_solver` 
+# fast_sudoku_solver
   
 ## Description  
   
@@ -60,7 +60,7 @@ python -m fast_sudoku_solver ..7........5.4..7..695...31...4.58.2.5..2..4.6.23.1
 ```
 
 ### Python
-The code examples below show a few of the functionalities of the package. Please also see the `examples/example_usage.py` script and the various Sudoku examples that are included in this repository.
+The code examples below show a few of the functionalities of the package. Please also see the `examples/example_usage.py` script and the various Sudoku examples that are included in the repository.
 
 #### Solving a Sudoku
 ```python 
