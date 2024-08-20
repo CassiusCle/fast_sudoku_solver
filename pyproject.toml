@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fast_sudoku_solver"
-version = "0.0.2"
+version = "1.0.0"
 description = "A fast Python Sudoku Solver for 9x9 puzzles using constraint propagation and brute force, powered by NumPy and with a command-line interface."
 keywords = ["sudoku", "solver", "fast", "constraint", "propagation", "brute", "force"]
 authors = ["CassiusCle"]
@@ -23,7 +23,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.bumpver]
-current_version = "0.0.2"
+current_version = "1.0.0"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "Bump version {old_version} -> {new_version}"
 commit = true
