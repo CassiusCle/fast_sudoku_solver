@@ -34,9 +34,5 @@ tag_scope = "default"
 
 [tool.bumpver.file_patterns]
 "pyproject.toml" = ['current_version = "{version}"', 'version = "{version}"']
-"sudoku_solver/__init__.py" = ["{version}"]
-"README.md" = [
-    "{version}",
-    "{pep440_version}",
-]
+"src/fast_sudoku_solver/__init__.py" = ['^__version__ = "{version}"$']
 
