@@ -1,8 +1,9 @@
-# Sudoku Solver  
+# `fast_sudoku_solver` 
   
 ## Description  
   
-This Sudoku Solver is a Python program designed to solve 9x9 Sudoku puzzles using constraint propagation techniques combined with brute force search when necessary. The solver leverages the power of NumPy for numerical computations, making it highly performant for a Python based solver.
+This is a Python-project for solving 9x9 Sudoku puzzles using constraint propagation techniques combined with brute force search when necessary. The solver leverages the power of NumPy for numerical computations, making it highly performant for a Python based solver. 
+It includes functionality to validate solutions, solve puzzles, and compute the number of possible value combinations for an unsolved Sudoku puzzle.
   
 ## Installation  
 To run the Sudoku Solver, you will need Python 3.9 or higher. You can install it in one of two ways:

@@ -3,10 +3,10 @@ This module provides a SudokuSolver class with methods to solve Sudoku puzzles u
 constraint propagation and backtracking search. It includes functionality to validate  
 solutions, solve puzzles, and compute the number of possible value combinations  
 for an unsolved Sudoku puzzle.  
-  
+
 The SudokuSolver class relies on NumPy for numerical computations and employs  
 constraint propagation combined with a backtracking search to find valid solutions.  
-  
+
 Typical usage example:  
     sudoku_solver = SudokuSolver()  
     solution = sudoku_solver.solve(unsolved_sudoku="...puzzle_string...")  
