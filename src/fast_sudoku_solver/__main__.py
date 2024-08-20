@@ -1,23 +1,26 @@
-"""  
-This module serves as the entry point for the sudoku_solver package.  
- 
+"""
+Entry point for the fast_sudoku_solver package.   
+
 It allows users to solve Sudoku puzzles provided as a command-line argument.  
 The puzzle should be a flattened string of 81 characters where each character  
 represents a cell in the puzzle (1-9 for filled cells, '0' or '.' for empty cells).  
 
 Example usage:  
-    python -m sudoku_solver "................................................................................."  
+    python -m fast_sudoku_solver <enter flattened Sudoku puzzle>  
 """
 
 import sys 
 
-from fast_sudoku_solver.sudoku import Sudoku
-from fast_sudoku_solver.utils import print_puzzle
+from fast_sudoku_solver.sudoku_solver import SudokuSolver
+from fast_sudoku_solver.services import SudokuFormatter
 
 def main() -> None:
     """  
-    The main function of the script. It parses the command line argument and attempts to solve the provided Sudoku puzzle.  
-    Exits the program with an appropriate message if an error occurs or if the puzzle is solved successfully.  
+    The main function of the script. 
+    
+    Parses the command line argument and attempts to solve the provided Sudoku puzzle.  
+    Exits the program with an appropriate message if an error occurs or if the puzzle  
+    is solved successfully.  
     """  
     if len(sys.argv) != 2:
         print("Usage: python -m sudoku_solver <flattened_puzzle>")
@@ -29,10 +32,10 @@ def main() -> None:
         sys.exit(1)
         
     try:
-        solution = Sudoku.solve(unsolved_sudoku=unsolved_puzzle)
+        solution = SudokuSolver.solve(unsolved_sudoku=unsolved_puzzle)
         if solution:  
             print("Solved Sudoku:")  
-            print_puzzle(puzzle=unsolved_puzzle, solution=solution)
+            SudokuFormatter.print(puzzle=unsolved_puzzle, solution=solution)
             print(f'Flattened solution: {solution}')  
         else:  
             print("No solution has been found for the provided Sudoku puzzle.")  
