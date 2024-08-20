@@ -59,35 +59,38 @@ python -m fast_sudoku_solver ..7........5.4..7..695...31...4.58.2.5..2..4.6.23.1
 ```
 
 ### Python
-The code examples below show a few of the functionalities of the package. Please also see the `examples/example_usage.py` script and the example puzzles that are included in this repository.
+The code examples below show a few of the functionalities of the package. Please also see the `examples/example_usage.py` script and the various Sudoku examples that are included in this repository.
 
 #### Solving a Sudoku
 ```python 
-from fast_sudoku_solver.sudoku import Sudoku  
+from fast_sudoku_solver.sudoku_solver import SudokuSolver  
  
 unsolved_puzzle = "..7........5.4..7..695...31...4.58.2.5..2..4.6.23.1...29...358..3..1.2........3.."
-solution: str = sudoku_solver.solve(puzzle) 
+solution: str = SudokuSolver.solve(unsolved_puzzle) 
 
-print("Solved Puzzle:", solution)  
+# Print solution as string
+print("Solved Puzzle:", solution) 
 ```
  
 #### Validating a solution:
 ```python 
-is_valid: bool = Sudoku.validate_solution(solution)
+is_valid: bool = SudokuSolver.validate(solution)
 
 print("Is the solution valid?", is_valid)  
 ```
 
 #### Printing a Sudoku in a formatted grid
 ```python 
-from fast_sudoku_solver.utils import print_puzzle
+from fast_sudoku_solver.services import SudokuFormatter
 
-print_puzzle(puzzle=unsolved_puzzle)
+# Pretty print orignal (unsolved) puzzle
+SudokuFormatter.print(puzzle=unsolved_puzzle)
 
-print_puzzle(solution=unsolved_puzzle)
+# Pretty print solution only
+SudokuFormatter.print(solution=solution)
 
-# Print original puzzle overlaid with solution
-print_puzzle(puzzle=puzzle, solution=solution) 
+# Pretty print original puzzle overlaid with solution
+SudokuFormatter.print(puzzle=unsolved_puzzle, solution=solution) 
 ```
 
 ## Testing
