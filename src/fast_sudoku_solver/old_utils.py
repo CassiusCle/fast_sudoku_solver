@@ -44,7 +44,6 @@ def print_puzzle(puzzle: Union[str, int] = None, solution: Optional[str] = None)
     else:
         puzzle = "." * 81
     
-
     # Overlay solution onto puzzle if provided
     if solution is not None:
         puzzle = "".join(

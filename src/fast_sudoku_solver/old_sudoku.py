@@ -21,13 +21,13 @@ from typing import List, Optional, Union
 
 import numpy as np
 
-from src.fast_sudoku_solver.utils import (
+from fast_sudoku_solver.old_utils import (
     validate_3d_solution,
     iter_to_np_puzzle,
     np_puzzle_to_string,
     generate_cell_index_updates,
 )
-from src.fast_sudoku_solver.techniques import apply_constraint_propagation
+from fast_sudoku_solver.old_techniques import apply_constraint_propagation
 
 # Set up logging configuration
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
@@ -84,7 +84,7 @@ class Sudoku:
 
     @staticmethod
     def solve(
-        unsolved_sudoku: Union[str, List[str]], max_iterations: int = 10_000_000
+        unsolved_sudoku: Union[str, List[Union[str, int]]], max_iterations: int = 10_000_000
     ) -> Optional[str]:
         """
         Solves a Sudoku puzzle.

@@ -1,18 +1,18 @@
-from fast_sudoku_solver.sudoku import Sudoku
-from fast_sudoku_solver.utils import print_puzzle
+from fast_sudoku_solver.sudoku_solver import SudokuSolver
+from fast_sudoku_solver.services import SudokuFormatter
 from examples.sudoku_puzzles import example_sudokus
 
 # Function to solve and print a Sudoku puzzle
-def solve_and_print(puzzle_number: str, puzzle: str) -> None:
+def solve_and_print(puzzle_number: str, unsolved_puzzle: str) -> None:
     """ Solves a Sudoku puzzle and prints the unsolved and solved versions. """
     print(f"Solving puzzle no. {puzzle_number}", end="\n")
     print("Unsolved puzzle:")
-    print_puzzle(puzzle=puzzle)
+    SudokuFormatter.print(puzzle=unsolved_puzzle)
 
     try:
-        solution = Sudoku.solve(puzzle)
+        solution = SudokuSolver.solve(unsolved_puzzle)
         print("Solved puzzle:")
-        print_puzzle(puzzle=puzzle, solution=solution)
+        SudokuFormatter.print(puzzle=unsolved_puzzle, solution=solution)
     except Exception as e:
         print(f"An error occurred while solving  and printing the puzzle: {e}")
 
