@@ -311,6 +311,7 @@ class ConstraintPropagation(SolvingStrategy):
 class Backtracking(SolvingStrategy):
     """Implements a backtracking algorithm for solving Sudoku puzzles.""" 
     
+    @classmethod
     def apply(
         cls, puzzle_2d: np.ndarray, options_3d: np.ndarray, max_iterations: int = 10_000_000
     ) -> Tuple[bool, np.ndarray, np.ndarray]:
@@ -337,7 +338,7 @@ class Backtracking(SolvingStrategy):
                 f"More than {max_iterations:_} combinations to check, aborting..."
             )
             return False, puzzle_2d, options_3d
-       
+
         # List options for each cell
         it = np.nditer(puzzle_2d, flags=["multi_index"])
         options_idx = [
