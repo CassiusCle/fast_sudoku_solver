@@ -1,5 +1,5 @@
-"""  
-This module serves as the entry point for the fast_sudoku_solver package.  
+"""
+Entry point for the fast_sudoku_solver package.   
 
 It allows users to solve Sudoku puzzles provided as a command-line argument.  
 The puzzle should be a flattened string of 81 characters where each character  
@@ -16,8 +16,11 @@ from fast_sudoku_solver.services import SudokuFormatter
 
 def main() -> None:
     """  
-    The main function of the script. It parses the command line argument and attempts to solve the provided Sudoku puzzle.  
-    Exits the program with an appropriate message if an error occurs or if the puzzle is solved successfully.  
+    The main function of the script. 
+    
+    Parses the command line argument and attempts to solve the provided Sudoku puzzle.  
+    Exits the program with an appropriate message if an error occurs or if the puzzle  
+    is solved successfully.  
     """  
     if len(sys.argv) != 2:
         print("Usage: python -m sudoku_solver <flattened_puzzle>")
